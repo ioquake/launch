@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/imgs">
+        <file>ioquaktree.png</file>
+        <file>iol.png</file>
+        <file>iolICO.png</file>
+    </qresource>
+</RCC>
