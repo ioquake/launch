@@ -28,10 +28,10 @@ void ioLaunch::on_btnLaunch_clicked()
         ioq3 = path + "\\ioquake3.x86.exe +set r_mode -1";
     }
 
-#elif Q_OS_X11
+#elif defined Q_OS_X11
     ioq3 = "ioquake3 +set r_mode -1";
-#elif Q_OS_MAC
-    ioq3 = "open -a ioquake3 +set r_mode -1";
+#elif defined Q_OS_MAC
+    ioq3 = "open -a ioquake3 --args +set r_mode -1";
 #endif
 
 
