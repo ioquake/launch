@@ -27,11 +27,12 @@ void ioLaunch::on_btnLaunch_clicked()
         path.replace(" ", "\" \"");
         ioq3 = path + "\\ioquake3.x86.exe +set r_mode -1";
     }
-
-#elif defined Q_OS_X11
-    ioq3 = "ioquake3 +set r_mode -1";
 #elif defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args +set r_mode -1";
+#elif defined Q_OS_UNIX
+    ioq3 = "ioquake3 +set r_mode -1";
+#else
+    #error "Unsupported platform"
 #endif
 
 
