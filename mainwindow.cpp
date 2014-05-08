@@ -3,7 +3,8 @@
 
 ioLaunch::ioLaunch(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ioLaunch)
+    ui(new Ui::ioLaunch),
+    ioWidth(0), ioHeight(0), ioWedited(false), ioHedited(false)
 {
     ui->setupUi(this);
     resOption = "";
@@ -116,7 +117,7 @@ void ioLaunch::on_cbResolution_currentIndexChanged(int index)
             }
         case 8:
             {
-                resOption = " +set r_customwidth 1024 +set r_customheight 3768";
+                resOption = " +set r_customwidth 1024 +set r_customheight 768";
                 break;
             }
         case 9:
