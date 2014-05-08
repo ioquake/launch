@@ -26,3 +26,5 @@ OTHER_FILES += \
 
 RESOURCES += \
     imgs.qrc
+
+RC_FILE = launch.rc
