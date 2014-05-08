@@ -1,3 +1,4 @@
+#include <QProcess>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -51,8 +52,7 @@ void ioLaunch::on_btnLaunch_clicked()
         screenOption = "";
     }
 
-    myProcess.start(ioq3+resOption+screenOption);
-    if(!myProcess.waitForStarted())
+    if(!QProcess::startDetached(ioq3+resOption+screenOption))
     {
         ioq3Failed.setText("ioquake3 failed to start!\nIs it installed?\n");
         ioq3Failed.exec();
