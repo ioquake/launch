@@ -25,8 +25,7 @@ void ioLaunch::on_btnLaunch_clicked()
         msg.setText("Please select your Quake3 directory");
         msg.exec();
         QString path = QFileDialog::getExistingDirectory (this, tr("Directory"), directory.path());
-        path.replace(" ", "\" \"");
-        ioq3 = path + "\\ioquake3.x86.exe +set r_mode -1";
+        ioq3 = QString("\"") + path + QDir::separator() + "ioquake3.x86.exe\" +set r_mode -1";
     }
 #elif defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args +set r_mode -1";
