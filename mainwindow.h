@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QDesktopWidget>
 #include <QMessageBox>
-#include <QProcess>
 #include <QString>
 #include <QtGlobal>
 #include <QFileDialog>
@@ -42,7 +41,6 @@ private slots:
 
 private:
     Ui::ioLaunch *ui;
-    QProcess myProcess;
     QString ioq3;
     QString resOption;
     QString screenOption;

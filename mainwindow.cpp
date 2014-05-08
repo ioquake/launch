@@ -1,9 +1,11 @@
+#include <QProcess>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 ioLaunch::ioLaunch(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ioLaunch)
+    ui(new Ui::ioLaunch),
+    ioWidth(0), ioHeight(0), ioWedited(false), ioHedited(false)
 {
     ui->setupUi(this);
     resOption = "";
@@ -24,8 +26,7 @@ void ioLaunch::on_btnLaunch_clicked()
         msg.setText("Please select your Quake3 directory");
         msg.exec();
         QString path = QFileDialog::getExistingDirectory (this, tr("Directory"), directory.path());
-        path.replace(" ", "\" \"");
-        ioq3 = path + "\\ioquake3.x86.exe +set r_mode -1";
+        ioq3 = QString("\"") + path + QDir::separator() + "ioquake3.x86.exe\" +set r_mode -1";
     }
 #elif defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args +set r_mode -1";
@@ -51,15 +52,14 @@ void ioLaunch::on_btnLaunch_clicked()
         screenOption = "";
     }
 
-    myProcess.start(ioq3+resOption+screenOption);
-    if(!myProcess.waitForStarted())
+    if(!QProcess::startDetached(ioq3+resOption+screenOption))
     {
         ioq3Failed.setText("ioquake3 failed to start!\nIs it installed?\n");
         ioq3Failed.exec();
     }
 }
 
-void ioLaunch::on_cbResolution_highlighted(int index)
+void ioLaunch::on_cbResolution_highlighted(int /*index*/)
 {
     ioWedited = false;
     ioHedited = false;
@@ -116,7 +116,7 @@ void ioLaunch::on_cbResolution_currentIndexChanged(int index)
             }
         case 8:
             {
-                resOption = " +set r_customwidth 1024 +set r_customheight 3768";
+                resOption = " +set r_customwidth 1024 +set r_customheight 768";
                 break;
             }
         case 9:
