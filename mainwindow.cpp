@@ -59,7 +59,7 @@ void ioLaunch::on_btnLaunch_clicked()
     }
 }
 
-void ioLaunch::on_cbResolution_highlighted(int index)
+void ioLaunch::on_cbResolution_highlighted(int /*index*/)
 {
     ioWedited = false;
     ioHedited = false;
