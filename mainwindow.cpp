@@ -179,6 +179,17 @@ void ioLaunch::on_cbResolution_currentIndexChanged(int index)
         // Predefined.
         settings.setResolutionMode(index - 2);
     }
+
+    if (index == 1)
+    {
+        ui->sbWidth->setEnabled(true);
+        ui->sbHeight->setEnabled(true);
+    }
+    else
+    {
+        ui->sbWidth->setEnabled(false);
+        ui->sbHeight->setEnabled(false);
+    }
 }
 
 void ioLaunch::on_rbFull_toggled(bool checked)
