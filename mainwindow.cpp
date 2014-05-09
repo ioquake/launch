@@ -48,6 +48,36 @@ ioLaunch::ioLaunch(QWidget *parent) :
     }
 
     settings.setHaveRun(true);
+
+    // Populate the GUI with values read from settings.
+    if (settings.getResolutionMode() >= 0)
+    {
+        // Predefined.
+        ui->cbResolution->setCurrentIndex(2 + settings.getResolutionMode());
+    }
+    else if (settings.getResolutionMode() == -1)
+    {
+        // Custom.
+        ui->cbResolution->setCurrentIndex(0);
+    }
+    else if (settings.getResolutionMode() == -2)
+    {
+        // Desktop.
+        ui->cbResolution->setCurrentIndex(1);
+    }
+
+    ui->sbWidth->setValue(settings.getResolutionWidth());
+    ui->sbHeight->setValue(settings.getResolutionHeight());
+    ioWedited = ioHedited = true;
+
+    if (settings.getResolutionFullscreen())
+    {
+        ui->rbFull->setChecked(true);
+    }
+    else
+    {
+        ui->rbWin->setChecked(true);
+    }
 }
 
 ioLaunch::~ioLaunch()
@@ -223,6 +253,22 @@ void ioLaunch::on_cbResolution_currentIndexChanged(int index)
                 break;
             }
     }
+
+    if (index == 0)
+    {
+        // Custom.
+        settings.setResolutionMode(-1);
+    }
+    else if (index == 1)
+    {
+        // Desktop.
+        settings.setResolutionMode(-2);
+    }
+    else
+    {
+        // Predefined.
+        settings.setResolutionMode(index - 2);
+    }
 }
 
 void ioLaunch::on_rbFull_toggled(bool checked)
@@ -230,6 +276,7 @@ void ioLaunch::on_rbFull_toggled(bool checked)
     if(checked)
     {
         screenOption = " +set r_fullscreen 1";
+        settings.setResolutionFullscreen(true);
     }
 }
 
@@ -238,6 +285,7 @@ void ioLaunch::on_rbWin_toggled(bool checked)
     if(checked)
     {
         screenOption = " +set r_fullscreen 0";
+        settings.setResolutionFullscreen(false);
     }
 }
 
@@ -261,6 +309,8 @@ void ioLaunch::on_sbWidth_valueChanged(int arg1)
     else{
         ioWedited = false;
     }
+
+    settings.setResolutionWidth(arg1);
 }
 
 void ioLaunch::on_sbHeight_valueChanged(int arg1)
@@ -274,6 +324,8 @@ void ioLaunch::on_sbHeight_valueChanged(int arg1)
     else{
         ioHedited = false;
     }
+
+    settings.setResolutionHeight(arg1);
 }
 
 // Since q3config.cfg is generated it's nice and clean and shouldn't need a full parser.
@@ -325,9 +377,6 @@ void ioLaunch::parseQuake3Config()
 
     QTextStream stream(&file);
 
-    // These may occur in any order, so process them after parsing the entire file.
-    QString r_mode, r_customwidth, r_customheight;
-
     while (!stream.atEnd())
     {
         const QString line(stream.readLine());
@@ -344,34 +393,20 @@ void ioLaunch::parseQuake3Config()
 
             if (cvar == "r_mode")
             {
-                r_mode = ParseToken(line, offset);
+                settings.setResolutionMode(ParseToken(line, offset).toInt());
             }
             else if (cvar == "r_customwidth")
             {
-                r_customwidth = ParseToken(line, offset);
+                settings.setResolutionWidth(ParseToken(line, offset).toInt());
             }
             else if (cvar == "r_customheight")
             {
-                r_customheight = ParseToken(line, offset);
+                settings.setResolutionHeight(ParseToken(line, offset).toInt());
             }
             else if (cvar == "r_fullscreen")
             {
-                // Set fullscreen/windows radio buttons.
-                const QString value(ParseToken(line, offset));
-
-                if (value == "0")
-                    ui->rbWin->setChecked(true);
-                else if (value == "1")
-                    ui->rbFull->setChecked(true);
+                settings.setResolutionFullscreen(ParseToken(line, offset).toInt() != 0);
             }
         }
-    }
-
-    // Populate resolution spinboxes.
-    if (r_mode == "-1" && !r_customwidth.isEmpty() && !r_customheight.isEmpty())
-    {
-        ui->sbWidth->setValue(r_customwidth.toInt());
-        ui->sbHeight->setValue(r_customheight.toInt());
-        ioWedited = ioHedited = true;
     }
 }

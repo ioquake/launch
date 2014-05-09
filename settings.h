@@ -39,6 +39,18 @@ public:
     bool containsQuakePath() const;
     void setQuakePath(const QString &path);
 
+    int getResolutionMode() const;
+    void setResolutionMode(int mode);
+
+    int getResolutionWidth() const;
+    void setResolutionWidth(int width);
+
+    int getResolutionHeight() const;
+    void setResolutionHeight(int height);
+
+    bool getResolutionFullscreen() const;
+    void setResolutionFullscreen(bool value);
+
 private:
     QSettings settings;
 };

@@ -52,3 +52,43 @@ void Settings::setQuakePath(const QString &path)
 {
     settings.setValue("quakePath", path);
 }
+
+int Settings::getResolutionMode() const
+{
+    return settings.value("resolution/mode", 3).toInt();
+}
+
+void Settings::setResolutionMode(int mode)
+{
+    settings.setValue("resolution/mode", mode);
+}
+
+int Settings::getResolutionWidth() const
+{
+    return settings.value("resolution/width", 1600).toInt();
+}
+
+void Settings::setResolutionWidth(int width)
+{
+    settings.setValue("resolution/width", width);
+}
+
+int Settings::getResolutionHeight() const
+{
+    return settings.value("resolution/height", 1024).toInt();
+}
+
+void Settings::setResolutionHeight(int height)
+{
+    settings.setValue("resolution/height", height);
+}
+
+bool Settings::getResolutionFullscreen() const
+{
+    return settings.value("resolution/fullscreen", 1).toBool();
+}
+
+void Settings::setResolutionFullscreen(bool value)
+{
+    settings.setValue("resolution/fullscreen", value);
+}
