@@ -13,12 +13,9 @@
 
 ioLaunch::ioLaunch(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ioLaunch),
-    ioWidth(0), ioHeight(0), ioWedited(false), ioHedited(false)
+    ui(new Ui::ioLaunch)
 {
     ui->setupUi(this);
-    resOption = "";
-    screenOption = "";
 
     // Calculate ioquake3 home path.
 #ifdef Q_OS_WIN32
@@ -58,17 +55,16 @@ ioLaunch::ioLaunch(QWidget *parent) :
     else if (settings.getResolutionMode() == -1)
     {
         // Custom.
-        ui->cbResolution->setCurrentIndex(0);
+        ui->cbResolution->setCurrentIndex(1);
     }
     else if (settings.getResolutionMode() == -2)
     {
         // Desktop.
-        ui->cbResolution->setCurrentIndex(1);
+        ui->cbResolution->setCurrentIndex(0);
     }
 
     ui->sbWidth->setValue(settings.getResolutionWidth());
     ui->sbHeight->setValue(settings.getResolutionHeight());
-    ioWedited = ioHedited = true;
 
     if (settings.getResolutionFullscreen())
     {
@@ -104,6 +100,7 @@ void ioLaunch::on_btnLaunch_clicked()
 
     if(promptForPath)
     {
+        QMessageBox msg;
         msg.setText("Please select your Quake3 directory");
         msg.exec();
 
@@ -115,156 +112,53 @@ void ioLaunch::on_btnLaunch_clicked()
         settings.setQuakePath(path);
     }
 
-    ioq3 = QString("\"") + settings.getQuakePath() + "/ioquake3.x86.exe\" +set r_mode -1";
+    ioq3 = QString("\"") + settings.getQuakePath() + "/ioquake3.x86.exe\"";
 #elif defined Q_OS_MAC
-    ioq3 = "open -a ioquake3 --args +set r_mode -1";
+    ioq3 = "open -a ioquake3 --args";
 #elif defined Q_OS_UNIX
-    ioq3 = "ioquake3 +set r_mode -1";
+    ioq3 = "ioquake3";
 #else
     #error "Unsupported platform"
 #endif
 
+    ioq3 += QString(" +set r_mode \"%1\"").arg(settings.getResolutionMode());
 
-    if(ioWedited == true && ioHedited == true)
+    if(settings.getResolutionMode() == -2)
     {
-
-        resOption = " +set r_customwidth " + QString::number(ioWidth) + " +set r_customheight " + QString::number(ioHeight);
+        // Desktop/native.
+        const QRect rect(QApplication::desktop()->screenGeometry());
+        ioq3 += QString(" +set r_customwidth %1").arg(rect.width()) + QString(" +set r_customheight %1").arg(rect.height());
 
     }
-    if(resOption == NULL)
+    else if (settings.getResolutionMode() == -1)
     {
-        resOption = "";
-    }
-    if(screenOption == NULL)
-    {
-        screenOption = "";
+        // Custom.
+        ioq3 += QString(" +set r_customwidth %1").arg(settings.getResolutionWidth()) + QString(" +set r_customheight %1").arg(settings.getResolutionHeight());
     }
 
-    if(!QProcess::startDetached(ioq3+resOption+screenOption))
+    ioq3 += QString(" +set r_fullscreen %1").arg(settings.getResolutionFullscreen() ? "1" : "0");
+
+    if(!QProcess::startDetached(ioq3))
     {
+        QMessageBox ioq3Failed;
         ioq3Failed.setText("ioquake3 failed to start!\nIs it installed?\n");
         ioq3Failed.exec();
     }
 }
 
-void ioLaunch::on_cbResolution_highlighted(int /*index*/)
-{
-    ioWedited = false;
-    ioHedited = false;
-}
-
 void ioLaunch::on_cbResolution_currentIndexChanged(int index)
 {
-    ioWedited = false;
-    ioHedited = false;
-    switch(index)
-    {
-        case 0:
-            {
-                resOption = "";
-                break;
-            }
-        case 1:
-            {
-                ioWidth = QApplication::desktop()->screenGeometry().width();
-                ioHeight = QApplication::desktop()->screenGeometry().height();
-
-                resOption = " +set r_customwidth " + QString::number(ioWidth) + " +set r_customheight " + QString::number(ioHeight);
-                break;
-            }
-        case 2:
-            {
-                resOption = " +set r_customwidth 320 +set r_customheight 240";
-                break;
-            }
-        case 3:
-            {
-                resOption = " +set r_customwidth 400 +set r_customheight 300";
-                break;
-            }
-        case 4:
-            {
-                resOption = " +set r_customwidth 512 +set r_customheight 384";
-                break;
-            }
-        case 5:
-            {
-                resOption = " +set r_customwidth 640 +set r_customheight 480";
-                break;
-            }
-        case 6:
-            {
-                resOption = " +set r_customwidth 800 +set r_customheight 600";
-                break;
-            }
-        case 7:
-            {
-                resOption = " +set r_customwidth 960 +set r_customheight 720";
-                break;
-            }
-        case 8:
-            {
-                resOption = " +set r_customwidth 1024 +set r_customheight 768";
-                break;
-            }
-        case 9:
-            {
-                resOption = " +set r_customwidth 1152 +set r_customheight 864";
-                break;
-            }
-        case 10:
-            {
-                resOption = " +set r_customwidth 1280 +set r_customheight 1024";
-                break;
-            }
-        case 11:
-            {
-                resOption = " +set r_customwidth 1600 +set r_customheight 1200";
-                break;
-            }
-        case 12:
-            {
-                resOption = " +set r_customwidth 2048 +set r_customheight 1536";
-                break;
-            }
-        case 13:
-            {
-                resOption = " +set r_customwidth 856 +set r_customheight 480";
-                break;
-            }
-        case 14:
-            {
-                resOption = " +set r_customwidth 1280 +set r_customheight 720";
-                break;
-            }
-        case 15:
-            {
-                resOption = " +set r_customwidth 1920 +set r_customheight 1080";
-                break;
-            }
-        case 16:
-            {
-                resOption = " +set r_customwidth 1280 +set r_customheight 800";
-                break;
-            }
-        default:
-            {
-                resOption = "";
-                break;
-            }
-    }
-
     if (index == 0)
-    {
-        // Custom.
-        settings.setResolutionMode(-1);
-    }
-    else if (index == 1)
     {
         // Desktop.
         settings.setResolutionMode(-2);
     }
-    else
+    else if (index == 1)
+    {
+        // Custom.
+        settings.setResolutionMode(-1);
+    }
+    else if (index >= 2)
     {
         // Predefined.
         settings.setResolutionMode(index - 2);
@@ -275,7 +169,6 @@ void ioLaunch::on_rbFull_toggled(bool checked)
 {
     if(checked)
     {
-        screenOption = " +set r_fullscreen 1";
         settings.setResolutionFullscreen(true);
     }
 }
@@ -284,47 +177,17 @@ void ioLaunch::on_rbWin_toggled(bool checked)
 {
     if(checked)
     {
-        screenOption = " +set r_fullscreen 0";
         settings.setResolutionFullscreen(false);
     }
 }
 
-void ioLaunch::on_rbDefault_toggled(bool checked)
-{
-    if(checked)
-    {
-        screenOption = "";
-    }
-}
-
-
 void ioLaunch::on_sbWidth_valueChanged(int arg1)
 {
-    ioWidth = 0;
-    if(arg1 >= 0)
-    {
-        ioWidth = arg1;
-        ioWedited = true;
-    }
-    else{
-        ioWedited = false;
-    }
-
     settings.setResolutionWidth(arg1);
 }
 
 void ioLaunch::on_sbHeight_valueChanged(int arg1)
 {
-    ioHeight = 0;
-    if(arg1 >= 0)
-    {
-        ioHeight = arg1;
-        ioHedited = true;
-    }
-    else{
-        ioHedited = false;
-    }
-
     settings.setResolutionHeight(arg1);
 }
 

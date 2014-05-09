@@ -25,16 +25,11 @@ public:
 private slots:
     void on_btnLaunch_clicked();
 
-
-    void on_cbResolution_highlighted(int index);
-
     void on_cbResolution_currentIndexChanged(int index);
 
     void on_rbFull_toggled(bool checked);
 
     void on_rbWin_toggled(bool checked);
-
-    void on_rbDefault_toggled(bool checked);
 
     void on_sbWidth_valueChanged(int arg1);
 
@@ -44,14 +39,6 @@ private:
     void parseQuake3Config();
 
     Ui::ioLaunch *ui;
-    QString resOption;
-    QString screenOption;
-    QMessageBox msg;
-    QMessageBox ioq3Failed;
-    int ioWidth;
-    int ioHeight;
-    bool ioWedited;
-    bool ioHedited;
     Settings settings;
     QString homePath;
 };
