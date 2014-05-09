@@ -8,6 +8,7 @@
 #include <QtGlobal>
 #include <QFileDialog>
 #include <QDir>
+#include "settings.h"
 
 namespace Ui {
 class ioLaunch;
@@ -41,17 +42,15 @@ private slots:
 
 private:
     Ui::ioLaunch *ui;
-    QString ioq3;
     QString resOption;
     QString screenOption;
     QMessageBox msg;
     QMessageBox ioq3Failed;
-    QDir directory;
     int ioWidth;
     int ioHeight;
     bool ioWedited;
     bool ioHedited;
-
+    Settings settings;
 };
 
 #endif // MAINWINDOW_H

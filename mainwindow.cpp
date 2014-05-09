@@ -20,14 +20,35 @@ ioLaunch::~ioLaunch()
 
 void ioLaunch::on_btnLaunch_clicked()
 {
+    QString ioq3;
+
 #ifdef Q_OS_WIN32
-    if(ioq3 == NULL)
+    // Prompt the user to set the ioq3 path if the settings value either doesn't exist or is invalid.
+    bool promptForPath = true;
+
+    if (settings.containsQuakePath())
+    {
+        const QString path = settings.getQuakePath();
+        const QDir dir(path);
+
+        if (!path.isEmpty() && dir.exists())
+            promptForPath = false;
+    }
+
+    if(promptForPath)
     {
         msg.setText("Please select your Quake3 directory");
         msg.exec();
-        QString path = QFileDialog::getExistingDirectory (this, tr("Directory"), directory.path());
-        ioq3 = QString("\"") + path + QDir::separator() + "ioquake3.x86.exe\" +set r_mode -1";
+
+        const QString path = QFileDialog::getExistingDirectory (this, tr("Directory"));
+
+        if (path.isEmpty())
+            return;
+
+        settings.setQuakePath(path);
     }
+
+    ioq3 = QString("\"") + settings.getQuakePath() + QDir::separator() + "ioquake3.x86.exe\" +set r_mode -1";
 #elif defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args +set r_mode -1";
 #elif defined Q_OS_UNIX
