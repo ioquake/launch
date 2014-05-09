@@ -121,19 +121,35 @@ void ioLaunch::on_btnLaunch_clicked()
     #error "Unsupported platform"
 #endif
 
-    ioq3 += QString(" +set r_mode \"%1\"").arg(settings.getResolutionMode());
+    int r_mode = settings.getResolutionMode();
+    int r_width = settings.getResolutionWidth();
+    int r_height = settings.getResolutionHeight();
 
-    if(settings.getResolutionMode() == -2)
+    // Handle modes outside what ioquake3 recognize.
+    if (r_mode == 12)
     {
-        // Desktop/native.
-        const QRect rect(QApplication::desktop()->screenGeometry());
-        ioq3 += QString(" +set r_customwidth %1").arg(rect.width()) + QString(" +set r_customheight %1").arg(rect.height());
-
+        r_mode = -1;
+        r_width = 1280;
+        r_height = 720;
     }
-    else if (settings.getResolutionMode() == -1)
+    else if (r_mode == 13)
     {
-        // Custom.
-        ioq3 += QString(" +set r_customwidth %1").arg(settings.getResolutionWidth()) + QString(" +set r_customheight %1").arg(settings.getResolutionHeight());
+        r_mode = -1;
+        r_width = 1920;
+        r_height = 1080;
+    }
+    else if (r_mode == 14)
+    {
+        r_mode = -1;
+        r_width = 1280;
+        r_height = 800;
+    }
+
+    ioq3 += QString(" +set r_mode \"%1\"").arg(r_mode);
+
+    if (r_mode == -1)
+    {
+        ioq3 += QString(" +set r_customwidth %1").arg(r_width) + QString(" +set r_customheight %1").arg(r_height);
     }
 
     ioq3 += QString(" +set r_fullscreen %1").arg(settings.getResolutionFullscreen() ? "1" : "0");
