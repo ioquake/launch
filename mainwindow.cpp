@@ -1,4 +1,12 @@
+#include <Qt>
 #include <QProcess>
+
+#ifdef Q_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shlobj.h>
+#endif
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -11,6 +19,24 @@ ioLaunch::ioLaunch(QWidget *parent) :
     resOption = "";
     screenOption = "";
 
+    // Calculate ioquake3 home path.
+#ifdef Q_OS_WIN32
+    wchar_t path[MAX_PATH];
+
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
+    {
+        homePath = QString::fromWCharArray(path) + "/Quake3";
+    }
+#elif defined(Q_OS_MAC) || defined(Q_OS_UNIX)
+    const QByteArray homeEnvRaw = qgetenv("HOME");
+    const QString homeEnv(homeEnvRaw.constData());
+
+    #if defined Q_OS_MAC
+    homePath = homeEnv + "/Library/Application Support/Quake3";
+    #elif defined Q_OS_UNIX
+    homePath = homeEnv + "/.q3a";
+    #endif
+#endif
 }
 
 ioLaunch::~ioLaunch()
@@ -48,7 +74,7 @@ void ioLaunch::on_btnLaunch_clicked()
         settings.setQuakePath(path);
     }
 
-    ioq3 = QString("\"") + settings.getQuakePath() + QDir::separator() + "ioquake3.x86.exe\" +set r_mode -1";
+    ioq3 = QString("\"") + settings.getQuakePath() + "/ioquake3.x86.exe\" +set r_mode -1";
 #elif defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args +set r_mode -1";
 #elif defined Q_OS_UNIX

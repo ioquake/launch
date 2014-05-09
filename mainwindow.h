@@ -51,6 +51,7 @@ private:
     bool ioWedited;
     bool ioHedited;
     Settings settings;
+    QString homePath;
 };
 
 #endif // MAINWINDOW_H
