@@ -28,6 +28,16 @@ Settings::Settings() :
 {
 }
 
+bool Settings::getHaveRun() const
+{
+    return settings.value("haveRun").toBool();
+}
+
+void Settings::setHaveRun(bool value)
+{
+    settings.setValue("haveRun", value);
+}
+
 QString Settings::getQuakePath() const
 {
     return settings.value("quakePath").toString();

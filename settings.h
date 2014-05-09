@@ -32,6 +32,9 @@ class Settings
 public:
     Settings();
 
+    bool getHaveRun() const;
+    void setHaveRun(bool value);
+
     QString getQuakePath() const;
     bool containsQuakePath() const;
     void setQuakePath(const QString &path);

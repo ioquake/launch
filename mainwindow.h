@@ -41,6 +41,8 @@ private slots:
     void on_sbHeight_valueChanged(int arg1);
 
 private:
+    void parseQuake3Config();
+
     Ui::ioLaunch *ui;
     QString resOption;
     QString screenOption;

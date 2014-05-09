@@ -1,5 +1,6 @@
 #include <Qt>
 #include <QProcess>
+#include <QTextStream>
 
 #ifdef Q_OS_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -37,6 +38,16 @@ ioLaunch::ioLaunch(QWidget *parent) :
     homePath = homeEnv + "/.q3a";
     #endif
 #endif
+
+    QDir homeDir(homePath);
+
+    // Try to parse q3config.cfg to get default settings if this is the first time the program has run.
+    if (!homePath.isEmpty() && homeDir.exists() && !settings.getHaveRun())
+    {
+        parseQuake3Config();
+    }
+
+    settings.setHaveRun(true);
 }
 
 ioLaunch::~ioLaunch()
@@ -262,5 +273,105 @@ void ioLaunch::on_sbHeight_valueChanged(int arg1)
     }
     else{
         ioHedited = false;
+    }
+}
+
+// Since q3config.cfg is generated it's nice and clean and shouldn't need a full parser.
+static QString ParseToken(const QString &s, int &offset)
+{
+    // Skip whitespace.
+    while (offset < s.length() && s[offset] == ' ')
+    {
+        offset++;
+    }
+
+    if (offset >= s.length())
+        return QString();
+
+    // Check for quoted token.
+    bool quoted = s[offset] == '\"';
+
+    if (quoted)
+        offset++;
+
+    // Parse token.
+    int start = offset;
+
+    while (offset < s.length() && ((quoted && s[offset] != '\"') || (!quoted && s[offset] != ' ')))
+    {
+        offset++;
+    }
+
+    // Get token substring.
+    int end = offset;
+
+    if (quoted && s[offset] == '\"')
+    {
+        offset++;
+    }
+
+    if (end - start <= 0)
+        return QString();
+
+    return s.mid(start, end - start);
+}
+
+void ioLaunch::parseQuake3Config()
+{
+    QFile file(homePath + "/baseq3/q3config.cfg");
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream stream(&file);
+
+    // These may occur in any order, so process them after parsing the entire file.
+    QString r_mode, r_customwidth, r_customheight;
+
+    while (!stream.atEnd())
+    {
+        const QString line(stream.readLine());
+
+        // Skip comments.
+        if (line.startsWith("//"))
+            continue;
+
+        int offset = 0;
+
+        if (ParseToken(line, offset) == "seta")
+        {
+            const QString cvar(ParseToken(line, offset));
+
+            if (cvar == "r_mode")
+            {
+                r_mode = ParseToken(line, offset);
+            }
+            else if (cvar == "r_customwidth")
+            {
+                r_customwidth = ParseToken(line, offset);
+            }
+            else if (cvar == "r_customheight")
+            {
+                r_customheight = ParseToken(line, offset);
+            }
+            else if (cvar == "r_fullscreen")
+            {
+                // Set fullscreen/windows radio buttons.
+                const QString value(ParseToken(line, offset));
+
+                if (value == "0")
+                    ui->rbWin->setChecked(true);
+                else if (value == "1")
+                    ui->rbFull->setChecked(true);
+            }
+        }
+    }
+
+    // Populate resolution spinboxes.
+    if (r_mode == "-1" && !r_customwidth.isEmpty() && !r_customheight.isEmpty())
+    {
+        ui->sbWidth->setValue(r_customwidth.toInt());
+        ui->sbHeight->setValue(r_customheight.toInt());
+        ioWedited = ioHedited = true;
     }
 }
