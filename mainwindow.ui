@@ -137,22 +137,6 @@ QTabWidget::tab-bar{
      <attribute name="title">
       <string>Settings</string>
      </attribute>
-     <widget class="QRadioButton" name="rbDefault">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>40</y>
-        <width>91</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Default</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QComboBox" name="cbResolution">
       <property name="geometry">
        <rect>
@@ -164,12 +148,12 @@ QTabWidget::tab-bar{
       </property>
       <item>
        <property name="text">
-        <string>Default</string>
+        <string>Native</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Native</string>
+        <string>Custom</string>
        </property>
       </item>
       <item>
@@ -264,7 +248,7 @@ QTabWidget::tab-bar{
      <widget class="QRadioButton" name="rbWin">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>200</x>
         <y>40</y>
         <width>121</width>
         <height>21</height>
@@ -329,7 +313,7 @@ QTabWidget::tab-bar{
      <widget class="QRadioButton" name="rbFull">
       <property name="geometry">
        <rect>
-        <x>200</x>
+        <x>90</x>
         <y>40</y>
         <width>111</width>
         <height>21</height>
@@ -339,7 +323,7 @@ QTabWidget::tab-bar{
        <string>FullScreen</string>
       </property>
       <property name="checked">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="label_4">

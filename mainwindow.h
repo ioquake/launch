@@ -8,6 +8,7 @@
 #include <QtGlobal>
 #include <QFileDialog>
 #include <QDir>
+#include "settings.h"
 
 namespace Ui {
 class ioLaunch;
@@ -24,34 +25,22 @@ public:
 private slots:
     void on_btnLaunch_clicked();
 
-
-    void on_cbResolution_highlighted(int index);
-
     void on_cbResolution_currentIndexChanged(int index);
 
     void on_rbFull_toggled(bool checked);
 
     void on_rbWin_toggled(bool checked);
 
-    void on_rbDefault_toggled(bool checked);
-
     void on_sbWidth_valueChanged(int arg1);
 
     void on_sbHeight_valueChanged(int arg1);
 
 private:
-    Ui::ioLaunch *ui;
-    QString ioq3;
-    QString resOption;
-    QString screenOption;
-    QMessageBox msg;
-    QMessageBox ioq3Failed;
-    QDir directory;
-    int ioWidth;
-    int ioHeight;
-    bool ioWedited;
-    bool ioHedited;
+    void parseQuake3Config();
 
+    Ui::ioLaunch *ui;
+    Settings settings;
+    QString homePath;
 };
 
 #endif // MAINWINDOW_H
