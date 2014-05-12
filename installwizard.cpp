@@ -1,7 +1,7 @@
 #include "installwizard.h"
 #include "ui_installwizard.h"
 #include "installwizard_installtype.h"
-#include "installwizard_locatepage.h"
+#include "installwizard_locate.h"
 #include "installwizard_patch.h"
 #include "installwizard_finished.h"
 #include "settings.h"

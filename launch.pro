@@ -16,7 +16,7 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     installwizard.cpp \
-    installwizard_locatepage.cpp \
+    installwizard_locate.cpp \
     installwizard_installtype.cpp \
     installwizard_finished.cpp \
     installwizard_patch.cpp
@@ -24,14 +24,14 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     settings.h \
     installwizard.h \
-    installwizard_locatepage.h \
+    installwizard_locate.h \
     installwizard_installtype.h \
     installwizard_finished.h \
     installwizard_patch.h
 
 FORMS    += mainwindow.ui \
     installwizard.ui \
-    installwizard_locatepage.ui \
+    installwizard_locate.ui \
     installwizard_installtype.ui \
     installwizard_finished.ui \
     installwizard_patch.ui

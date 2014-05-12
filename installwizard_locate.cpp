@@ -1,7 +1,7 @@
 #include <QCryptographicHash>
 #include <QFileDialog>
 #include <QMessageBox>
-#include "installwizard_locatepage.h"
+#include "installwizard_locate.h"
 #include "ui_installwizard_locatepage.h"
 #include "installwizard.h"
 #include "settings.h"
