@@ -14,12 +14,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    settings.cpp
+    settings.cpp \
+    installwizard.cpp \
+    installwizard_locatepage.cpp
 
 HEADERS  += mainwindow.h \
-    settings.h
+    settings.h \
+    installwizard.h \
+    installwizard_locatepage.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    installwizard.ui \
+    installwizard_locatepage.ui
 
 OTHER_FILES += \
     README.md \

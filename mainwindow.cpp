@@ -10,6 +10,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "installwizard.h"
 
 ioLaunch::ioLaunch(QWidget *parent) :
     QMainWindow(parent),
@@ -86,30 +87,13 @@ void ioLaunch::on_btnLaunch_clicked()
     QString ioq3;
 
 #ifdef Q_OS_WIN32
-    // Prompt the user to set the ioq3 path if the settings value either doesn't exist or is invalid.
-    bool promptForPath = true;
-
-    if (settings.containsQuakePath())
+    if(!isQuake3PathValid())
     {
-        const QString path = settings.getQuakePath();
-        const QDir dir(path);
+        InstallWizard wizard(this, &settings);
+        wizard.exec();
 
-        if (!path.isEmpty() && dir.exists())
-            promptForPath = false;
-    }
-
-    if(promptForPath)
-    {
-        QMessageBox msg;
-        msg.setText("Please select your Quake3 directory");
-        msg.exec();
-
-        const QString path = QFileDialog::getExistingDirectory (this, tr("Directory"));
-
-        if (path.isEmpty())
+        if(!isQuake3PathValid())
             return;
-
-        settings.setQuakePath(path);
     }
 
     ioq3 = QString("\"") + settings.getQuakePath() + "/ioquake3.x86.exe\"";
@@ -218,6 +202,12 @@ void ioLaunch::on_sbHeight_valueChanged(int arg1)
     settings.setResolutionHeight(arg1);
 }
 
+void ioLaunch::on_btnRunInstallWizard_clicked()
+{
+    InstallWizard wizard(this, &settings);
+    wizard.exec();
+}
+
 // Since q3config.cfg is generated it's nice and clean and shouldn't need a full parser.
 static QString ParseToken(const QString &s, int &offset)
 {
@@ -257,6 +247,16 @@ static QString ParseToken(const QString &s, int &offset)
 
     return s.mid(start, end - start);
 }
+
+#ifdef Q_OS_WIN32
+bool ioLaunch::isQuake3PathValid() const
+{
+    if (!settings.containsQuakePath())
+        return false;
+
+    return !settings.getQuakePath().isEmpty() && QDir(settings.getQuakePath()).exists();
+}
+#endif
 
 void ioLaunch::parseQuake3Config()
 {

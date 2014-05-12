@@ -35,7 +35,14 @@ private slots:
 
     void on_sbHeight_valueChanged(int arg1);
 
+    void on_btnRunInstallWizard_clicked();
+
 private:
+#ifdef Q_OS_WIN32
+    // Returns false if the settings ioq3 path either doesn't exist or is invalid.
+    bool isQuake3PathValid() const;
+#endif
+
     void parseQuake3Config();
 
     Ui::ioLaunch *ui;
