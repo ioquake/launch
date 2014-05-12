@@ -1,5 +1,6 @@
 #include "installwizard.h"
 #include "ui_installwizard.h"
+#include "installwizard_installtype.h"
 #include "installwizard_locatepage.h"
 #include "settings.h"
 
@@ -9,6 +10,7 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     settings(settings)
 {
     ui->setupUi(this);
+    setPage(Page_InstallType, new InstallWizard_InstallType(this));
 
 #ifdef Q_OS_WIN32
     setPage(Page_Locate, new InstallWizard_LocatePage(this, settings));

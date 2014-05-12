@@ -19,6 +19,7 @@ public:
 
     enum
     {
+        Page_InstallType,
         Page_Locate
     };
 

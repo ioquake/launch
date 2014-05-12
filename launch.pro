@@ -16,16 +16,19 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     installwizard.cpp \
-    installwizard_locatepage.cpp
+    installwizard_locatepage.cpp \
+    installwizard_installtype.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
     installwizard.h \
-    installwizard_locatepage.h
+    installwizard_locatepage.h \
+    installwizard_installtype.h
 
 FORMS    += mainwindow.ui \
     installwizard.ui \
-    installwizard_locatepage.ui
+    installwizard_locatepage.ui \
+    installwizard_installtype.ui
 
 OTHER_FILES += \
     README.md \
