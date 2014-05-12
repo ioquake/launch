@@ -20,7 +20,9 @@ public:
     enum
     {
         Page_InstallType,
-        Page_Locate
+        Page_Locate,
+        Page_Patch,
+        Page_Finished
     };
 
 private slots:

@@ -23,10 +23,12 @@ private slots:
 
 protected:
     virtual bool validatePage();
+    virtual int nextId() const;
 
 private:
     Ui::InstallWizard_LocatePage *ui;
     Settings *settings;
+    bool isQuake3PatchRequired;
 };
 
 #endif // INSTALLWIZARD_LOCATEPAGE_H

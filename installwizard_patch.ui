@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InstallWizard_Patch</class>
+ <widget class="QWizardPage" name="InstallWizard_Patch">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <property name="title">
+   <string>Installing Patch...</string>
+  </property>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

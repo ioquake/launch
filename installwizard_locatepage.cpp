@@ -1,13 +1,16 @@
+#include <QCryptographicHash>
 #include <QFileDialog>
 #include <QMessageBox>
 #include "installwizard_locatepage.h"
 #include "ui_installwizard_locatepage.h"
+#include "installwizard.h"
 #include "settings.h"
 
 InstallWizard_LocatePage::InstallWizard_LocatePage(QWidget *parent, Settings *settings) :
     QWizardPage(parent),
     ui(new Ui::InstallWizard_LocatePage),
-    settings(settings)
+    settings(settings),
+    isQuake3PatchRequired(false)
 {
     ui->setupUi(this);
     registerField("quake3Path*", ui->txtLocation);
@@ -46,5 +49,30 @@ bool InstallWizard_LocatePage::validatePage()
         return false;
     }
 
+    // Check if the Quake 3 installation needs patching.
+    const QString pakFilename(ui->txtLocation->text() + "/baseq3/pak1.pk3");
+    QFile file(pakFilename);
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(this, "Missing file", QString("Unable to open file '%1'").arg(pakFilename));
+        return false;
+    }
+
+    const QByteArray hash = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5).toHex();
+    isQuake3PatchRequired = (hash != "48911719d91be25adb957f2d325db4a0");
+
     return true;
+}
+
+int InstallWizard_LocatePage::nextId() const
+{
+    if (isQuake3PatchRequired)
+    {
+        return InstallWizard::Page_Patch;
+    }
+    else
+    {
+        return InstallWizard::Page_Finished;
+    }
 }
