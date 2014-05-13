@@ -54,7 +54,10 @@ void InstallWizard_Patch::cancel()
 
     delete patchFile;
     patchFile = NULL;
-    networkReply->abort();
+
+    if (!isDownloadFinished)
+        networkReply->abort();
+
     isCancelled = true;
 }
 
