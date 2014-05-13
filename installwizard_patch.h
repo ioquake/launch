@@ -28,11 +28,12 @@ private slots:
 
 private:
     Ui::InstallWizard_Patch *ui;
-    QTemporaryFile *patchFile;
+    QTemporaryFile *patchFile, *unzippedPatchFile;
     QNetworkAccessManager nam;
     QNetworkReply *networkReply;
     bool isCancelled;
     bool isDownloadFinished;
+    bool isPatchUnzipped;
     bool usePatchFileBuffer;
     QByteArray patchFileBuffer;
 };

@@ -1,5 +1,6 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QtZlib/zlib.h>
 #include "installwizard_patch.h"
 #include "ui_installwizard_patch.h"
 #include "installwizard.h"
@@ -8,9 +9,11 @@ InstallWizard_Patch::InstallWizard_Patch(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::InstallWizard_Patch),
     patchFile(NULL),
+    unzippedPatchFile(NULL),
     networkReply(NULL),
     isCancelled(false),
     isDownloadFinished(false),
+    isPatchUnzipped(false),
     usePatchFileBuffer(true)
 {
     ui->setupUi(this);
@@ -19,12 +22,13 @@ InstallWizard_Patch::InstallWizard_Patch(QWidget *parent) :
 InstallWizard_Patch::~InstallWizard_Patch()
 {
     delete patchFile;
+    delete unzippedPatchFile;
     delete ui;
 }
 
 void InstallWizard_Patch::initializePage()
 {
-    isCancelled = isDownloadFinished = false;
+    isCancelled = isDownloadFinished = isPatchUnzipped = false;
     patchFileBuffer.clear();
     usePatchFileBuffer = true;
 
@@ -44,7 +48,7 @@ void InstallWizard_Patch::cleanupPage()
 
 bool InstallWizard_Patch::isComplete() const
 {
-    return isDownloadFinished;
+    return isDownloadFinished && isPatchUnzipped;
 }
 
 void InstallWizard_Patch::cancel()
@@ -54,6 +58,8 @@ void InstallWizard_Patch::cancel()
 
     delete patchFile;
     patchFile = NULL;
+    delete unzippedPatchFile;
+    unzippedPatchFile = NULL;
 
     if (!isDownloadFinished)
         networkReply->abort();
@@ -100,6 +106,69 @@ void InstallWizard_Patch::downloadFinished()
     }
 
     networkReply->deleteLater();
+
+    if (isCancelled)
+        return;
+
     isDownloadFinished = true;
+
+    // Extract gzip compressed archive.
+    z_stream zstream;
+    zstream.zalloc = Z_NULL;
+    zstream.zfree = Z_NULL;
+    zstream.opaque = Z_NULL;
+    zstream.avail_in = 0;
+    zstream.next_in = Z_NULL;
+
+    int result = inflateInit2(&zstream, 32 | MAX_WBITS);
+
+    if (result != Z_OK)
+    {
+        ui->lblStatus->setText("zlib inflateInit2 failed");
+        cancel();
+        return;
+    }
+
+    patchFile->seek(0);
+    unzippedPatchFile = new QTemporaryFile;
+    unzippedPatchFile->open();
+
+    const int bufferSize = 32 * 1024;
+    static char inputBuffer[bufferSize];
+    static char outputBuffer[bufferSize];
+
+    do
+    {
+        qint64 bytesRead = patchFile->read(inputBuffer, bufferSize);
+
+        if (bytesRead == 0)
+            break;
+
+        zstream.avail_in = bytesRead;
+        zstream.next_in = (z_Bytef *)inputBuffer;
+
+        do
+        {
+            zstream.avail_out = bufferSize;
+            zstream.next_out = (z_Bytef *)outputBuffer;
+
+            result = inflate(&zstream, Z_NO_FLUSH);
+
+            if (result != Z_OK && result != Z_STREAM_END)
+            {
+                ui->lblStatus->setText(QString("zlib error %1").arg(result));
+                inflateEnd(&zstream);
+                cancel();
+                return;
+            }
+
+            unzippedPatchFile->write(outputBuffer, bufferSize - zstream.avail_out);
+        }
+        while (zstream.avail_out == 0);
+    }
+    while (result != Z_STREAM_END);
+
+    inflateEnd(&zstream);
+    isPatchUnzipped = true;
     emit completeChanged();
 }
