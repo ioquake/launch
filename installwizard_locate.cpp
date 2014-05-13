@@ -53,6 +53,13 @@ bool InstallWizard_LocatePage::validatePage()
     const QString pakFilename(ui->txtLocation->text() + "/baseq3/pak1.pk3");
     QFile file(pakFilename);
 
+    if (!file.exists())
+    {
+        // pak1.pk3 doesn't exist, must be a fresh install.
+        isQuake3PatchRequired = true;
+        return true;
+    }
+
     if (!file.open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this, "Missing file", QString("Unable to open file '%1'").arg(pakFilename));

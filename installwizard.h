@@ -28,7 +28,7 @@ public:
 
 private slots:
     void cancel();
-    void on_InstallWizard_customButtonClicked(int which);
+    void on_InstallWizard_finished(int result);
 
 private:
     Ui::InstallWizard *ui;

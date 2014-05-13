@@ -33,7 +33,7 @@ private:
     QNetworkReply *networkReply;
     bool isCancelled;
     bool isDownloadFinished;
-    bool isPatchUnzipped;
+    bool isPatchInstalled;
     bool usePatchFileBuffer;
     QByteArray patchFileBuffer;
 };

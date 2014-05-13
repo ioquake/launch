@@ -48,12 +48,14 @@ void InstallWizard::cancel()
     reject();
 }
 
-void InstallWizard::on_InstallWizard_customButtonClicked(int which)
+void InstallWizard::on_InstallWizard_finished(int result)
 {
-    if (which == QWizard::FinishButton)
-    {
 #ifdef Q_OS_WIN32
+    if (result == QDialog::Accepted)
+    {
         settings->setQuakePath(field("quake3Path").toString());
-#endif
     }
+#else
+    result = result; // Silence warning.
+#endif
 }
