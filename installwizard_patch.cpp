@@ -10,7 +10,8 @@ InstallWizard_Patch::InstallWizard_Patch(QWidget *parent) :
     patchFile(NULL),
     networkReply(NULL),
     isCancelled(false),
-    isDownloadFinished(false)
+    isDownloadFinished(false),
+    usePatchFileBuffer(true)
 {
     ui->setupUi(this);
 }
@@ -24,6 +25,8 @@ InstallWizard_Patch::~InstallWizard_Patch()
 void InstallWizard_Patch::initializePage()
 {
     isCancelled = isDownloadFinished = false;
+    patchFileBuffer.clear();
+    usePatchFileBuffer = true;
 
     patchFile = new QTemporaryFile;
     patchFile->open();
@@ -57,7 +60,24 @@ void InstallWizard_Patch::cancel()
 
 void InstallWizard_Patch::downloadRead()
 {
-    patchFile->write(networkReply->readAll());
+    // Skip the first n bytes, giving a valid tar.gz file.
+    if (usePatchFileBuffer)
+    {
+        const qint64 bytesToSkip = 8251;
+
+        patchFileBuffer.append(networkReply->readAll());
+
+        if (patchFileBuffer.length() > bytesToSkip + 1)
+        {
+            patchFile->write(&patchFileBuffer.data()[bytesToSkip], patchFileBuffer.length() - bytesToSkip);
+            usePatchFileBuffer = false;
+            patchFileBuffer.clear();
+        }
+    }
+    else
+    {
+        patchFile->write(networkReply->readAll());
+    }
 }
 
 void InstallWizard_Patch::downloadProgress(qint64 bytesRead, qint64 bytesTotal)

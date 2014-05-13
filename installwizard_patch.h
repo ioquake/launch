@@ -33,6 +33,8 @@ private:
     QNetworkReply *networkReply;
     bool isCancelled;
     bool isDownloadFinished;
+    bool usePatchFileBuffer;
+    QByteArray patchFileBuffer;
 };
 
 #endif // INSTALLWIZARD_PATCH_H
