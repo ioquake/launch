@@ -7,6 +7,7 @@ namespace Ui {
 class InstallWizard;
 }
 
+class QPushButton;
 class Settings;
 
 class InstallWizard : public QWizard
@@ -26,10 +27,12 @@ public:
     };
 
 private slots:
+    void cancel();
     void on_InstallWizard_customButtonClicked(int which);
 
 private:
     Ui::InstallWizard *ui;
+    QPushButton *cancelButton;
     Settings *settings;
 };
 

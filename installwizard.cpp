@@ -1,3 +1,4 @@
+#include <QPushButton>
 #include "installwizard.h"
 #include "ui_installwizard.h"
 #include "installwizard_installtype.h"
@@ -11,7 +12,17 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     ui(new Ui::InstallWizard),
     settings(settings)
 {
+    setOptions(QWizard::NoCancelButton | QWizard::HaveCustomButton1);
+    cancelButton = new QPushButton("Cancel");
+    setButton(QWizard::CustomButton1, cancelButton);
+
+    QList<QWizard::WizardButton> layout;
+    layout << QWizard::BackButton << QWizard::CustomButton1 << QWizard::Stretch << QWizard::NextButton << QWizard::FinishButton;
+    setButtonLayout(layout);
+
     ui->setupUi(this);
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+
     setPage(Page_InstallType, new InstallWizard_InstallType(this));
 
 #ifdef Q_OS_WIN32
@@ -25,6 +36,16 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
 InstallWizard::~InstallWizard()
 {
     delete ui;
+}
+
+void InstallWizard::cancel()
+{
+    if (currentId() == Page_Patch)
+    {
+        ((InstallWizard_Patch *)currentPage())->cancel();
+    }
+
+    reject();
 }
 
 void InstallWizard::on_InstallWizard_customButtonClicked(int which)
