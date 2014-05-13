@@ -3,6 +3,7 @@
 #include "ui_installwizard.h"
 #include "installwizard_installtype.h"
 #include "installwizard_locate.h"
+#include "installwizard_eula.h"
 #include "installwizard_patch.h"
 #include "installwizard_finished.h"
 #include "settings.h"
@@ -29,6 +30,7 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     setPage(Page_Locate, new InstallWizard_LocatePage(this, settings));
 #endif
 
+    setPage(Page_Eula, new InstallWizard_Eula());
     setPage(Page_Patch, new InstallWizard_Patch());
     setPage(Page_Finished, new InstallWizard_Finished());
 }

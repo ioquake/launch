@@ -2,7 +2,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "installwizard_locate.h"
-#include "ui_installwizard_locatepage.h"
+#include "ui_installwizard_locate.h"
 #include "installwizard.h"
 #include "settings.h"
 
@@ -76,7 +76,7 @@ int InstallWizard_LocatePage::nextId() const
 {
     if (isQuake3PatchRequired)
     {
-        return InstallWizard::Page_Patch;
+        return InstallWizard::Page_Eula;
     }
     else
     {

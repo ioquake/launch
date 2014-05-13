@@ -22,6 +22,7 @@ public:
     {
         Page_InstallType,
         Page_Locate,
+        Page_Eula,
         Page_Patch,
         Page_Finished
     };
