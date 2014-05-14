@@ -24,6 +24,7 @@ public:
         Page_Locate,
         Page_Install,
         Page_Eula,
+        Page_Copy,
         Page_Patch,
         Page_Finished
     };

@@ -3,6 +3,7 @@
 #include "ui_installwizard.h"
 #include "installwizard_installtype.h"
 #include "installwizard_locate.h"
+#include "installwizard_copy.h"
 #include "installwizard_eula.h"
 #include "installwizard_install.h"
 #include "installwizard_patch.h"
@@ -33,6 +34,7 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
 
     setPage(Page_Install, new InstallWizard_Install());
     setPage(Page_Eula, new InstallWizard_Eula());
+    setPage(Page_Copy, new InstallWizard_Copy());
     setPage(Page_Patch, new InstallWizard_Patch());
     setPage(Page_Finished, new InstallWizard_Finished());
 }
@@ -44,7 +46,11 @@ InstallWizard::~InstallWizard()
 
 void InstallWizard::cancel()
 {
-    if (currentId() == Page_Patch)
+    if (currentId() == Page_Copy)
+    {
+        ((InstallWizard_Copy *)currentPage())->cancel();
+    }
+    else if (currentId() == Page_Patch)
     {
         ((InstallWizard_Patch *)currentPage())->cancel();
     }

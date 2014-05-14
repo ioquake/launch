@@ -46,7 +46,7 @@ bool InstallWizard_Install::isComplete() const
 
 int InstallWizard_Install::nextId() const
 {
-    return InstallWizard::Page_Finished;
+    return InstallWizard::Page_Eula;
 }
 
 void InstallWizard_Install::on_btnBrowseSource_clicked()
