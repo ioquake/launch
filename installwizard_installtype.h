@@ -14,6 +14,7 @@ class InstallWizard_InstallType : public QWizardPage
 public:
     explicit InstallWizard_InstallType(QWidget *parent = 0);
     ~InstallWizard_InstallType();
+    virtual int nextId() const;
 
 private:
     Ui::InstallWizard_InstallType *ui;

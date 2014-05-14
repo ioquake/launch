@@ -14,7 +14,7 @@
    <string>WizardPage</string>
   </property>
   <property name="title">
-   <string>Locate Quake 3: Arena</string>
+   <string>Locate Quake III Arena</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1">

@@ -13,7 +13,6 @@ InstallWizard_LocatePage::InstallWizard_LocatePage(QWidget *parent, Settings *se
     isQuake3PatchRequired(false)
 {
     ui->setupUi(this);
-    registerField("quake3Path*", ui->txtLocation);
 }
 
 InstallWizard_LocatePage::~InstallWizard_LocatePage()
@@ -23,12 +22,13 @@ InstallWizard_LocatePage::~InstallWizard_LocatePage()
 
 void InstallWizard_LocatePage::initializePage()
 {
+    registerField("quake3Path*", ui->txtLocation);
     ui->txtLocation->setText(settings->getQuakePath());
 }
 
 void InstallWizard_LocatePage::on_btnBrowse_clicked()
 {
-    const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake 3: Arena Location"), settings->getQuakePath());
+    const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake III Arena Location"), settings->getQuakePath());
 
     if (!location.isEmpty())
     {

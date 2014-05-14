@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Quake 3: Arena Install Wizard</string>
+   <string>Quake III Arena Install Wizard</string>
   </property>
   <property name="windowIcon">
    <iconset resource="imgs.qrc">

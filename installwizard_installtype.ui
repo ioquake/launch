@@ -20,7 +20,7 @@
    <item>
     <widget class="QRadioButton" name="rbLocate">
      <property name="text">
-      <string>Locate an existing Quake 3: Arena installation</string>
+      <string>Locate an existing Quake III Arena installation</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -28,16 +28,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="rbCD">
+    <widget class="QRadioButton" name="rbInstall">
      <property name="text">
-      <string>Install from CD</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QRadioButton" name="rbSteam">
-     <property name="text">
-      <string>Install from Steam</string>
+      <string>Install from CD or Steam</string>
      </property>
     </widget>
    </item>
