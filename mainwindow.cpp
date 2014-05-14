@@ -45,6 +45,19 @@ ioLaunch::ioLaunch(QWidget *parent) :
         parseQuake3Config();
     }
 
+#ifdef Q_OS_WIN32
+    // On first run, try to get the Q3A path on Windows by reading it from the registry.
+    if (!settings.getHaveRun())
+    {
+        QSettings registry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Id\\Quake III Arena", QSettings::NativeFormat);
+
+        if (registry.contains("INSTALLPATH"))
+        {
+            settings.setQuakePath(registry.value("INSTALLPATH").toString());
+        }
+    }
+#endif
+
     settings.setHaveRun(true);
 
     // Populate the GUI with values read from settings.
