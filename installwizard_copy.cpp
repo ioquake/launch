@@ -106,6 +106,16 @@ bool InstallWizard_Copy::isComplete() const
     return isCopyFinished;
 }
 
+int InstallWizard_Copy::nextId() const
+{
+    if (((InstallWizard *)wizard())->getIsQuake3PatchRequired())
+    {
+        return InstallWizard::Page_Patch;
+    }
+
+    return InstallWizard::Page_Finished;
+}
+
 void InstallWizard_Copy::cancel()
 {
     if (!isCopyFinished)

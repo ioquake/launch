@@ -11,7 +11,8 @@
 InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     QWizard(parent),
     ui(new Ui::InstallWizard),
-    settings(settings)
+    settings(settings),
+    isQuake3PatchRequired(false)
 {
     setOptions(QWizard::NoCancelButton | QWizard::HaveCustomButton1);
     cancelButton = new QPushButton("Cancel");
@@ -47,6 +48,16 @@ void InstallWizard::addCopyFile(const QString &source, const QString &dest)
 const QList<InstallWizard::CopyFile> &InstallWizard::getCopyFiles() const
 {
     return copyFiles;
+}
+
+bool InstallWizard::getIsQuake3PatchRequired() const
+{
+    return isQuake3PatchRequired;
+}
+
+void InstallWizard::setIsQuake3PatchRequired(bool value)
+{
+    isQuake3PatchRequired = value;
 }
 
 void InstallWizard::cancel()

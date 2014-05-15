@@ -10,8 +10,7 @@
 InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
     QWizardPage(parent),
     ui(new Ui::InstallWizard_Setup),
-    settings(settings),
-    isQuake3PatchRequired(false)
+    settings(settings)
 {
     ui->setupUi(this);
 
@@ -56,6 +55,9 @@ bool InstallWizard_Setup::validatePage()
             QMessageBox::warning(wizard(), "Missing source", QString("Source file '%1' does not exist.").arg(ui->txtInstallSource->text()));
             return false;
         }
+
+        // CD doesn't contain latest patch.
+        ((InstallWizard *)wizard())->setIsQuake3PatchRequired(true);
 
         // Copy page will copy baseq3/pak0.pk3.
         ((InstallWizard *)wizard())->addCopyFile(ui->txtInstallSource->text(), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
@@ -112,7 +114,7 @@ bool InstallWizard_Setup::validatePage()
         if (!file.exists())
         {
             // pak1.pk3 doesn't exist, must be a fresh install.
-            isQuake3PatchRequired = true;
+            ((InstallWizard *)wizard())->setIsQuake3PatchRequired(true);
             registerField("quake3Path", ui->txtLocatePath);
             return true;
         }
@@ -124,7 +126,7 @@ bool InstallWizard_Setup::validatePage()
         }
 
         const QByteArray hash = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5).toHex();
-        isQuake3PatchRequired = (hash != "48911719d91be25adb957f2d325db4a0");
+        ((InstallWizard *)wizard())->setIsQuake3PatchRequired(hash != "48911719d91be25adb957f2d325db4a0");
         registerField("quake3Path", ui->txtLocatePath);
     }
 #endif
@@ -161,7 +163,7 @@ int InstallWizard_Setup::nextId() const
 #ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
     {
-        if (isQuake3PatchRequired)
+        if (((InstallWizard *)wizard())->getIsQuake3PatchRequired())
         {
             return InstallWizard::Page_Eula;
         }

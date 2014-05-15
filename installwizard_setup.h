@@ -59,7 +59,6 @@ private:
     Ui::InstallWizard_Setup *ui;
 
     Settings *settings;
-    bool isQuake3PatchRequired;
 };
 
 #endif // INSTALLWIZARD_INSTALLTYPE_H

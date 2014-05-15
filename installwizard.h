@@ -27,6 +27,9 @@ public:
     void addCopyFile(const QString &source, const QString &dest);
     const QList<CopyFile> &getCopyFiles() const;
 
+    bool getIsQuake3PatchRequired() const;
+    void setIsQuake3PatchRequired(bool value);
+
     enum
     {
         Page_Setup,
@@ -45,6 +48,7 @@ private:
     QPushButton *cancelButton;
     Settings *settings;
     QList<CopyFile> copyFiles;
+    bool isQuake3PatchRequired;
 };
 
 #endif // INSTALLWIZARD_H

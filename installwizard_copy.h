@@ -43,6 +43,7 @@ public:
     ~InstallWizard_Copy();
     virtual void initializePage();
     virtual bool isComplete() const;
+    virtual int nextId() const;
     void cancel();
 
 private slots:
