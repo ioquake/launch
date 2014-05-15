@@ -4,18 +4,18 @@
 #include <QWizardPage>
 
 namespace Ui {
-class InstallWizard_InstallType;
+class InstallWizard_Setup;
 }
 
 class Settings;
 
-class InstallWizard_InstallType : public QWizardPage
+class InstallWizard_Setup : public QWizardPage
 {
     Q_OBJECT
 
 public:
-    explicit InstallWizard_InstallType(QWidget *parent, Settings *settings);
-    ~InstallWizard_InstallType();
+    explicit InstallWizard_Setup(QWidget *parent, Settings *settings);
+    ~InstallWizard_Setup();
     virtual void initializePage();
     virtual bool validatePage();
     virtual bool isComplete() const;
@@ -56,7 +56,7 @@ private:
         Page_InstallSteam
     };
 
-    Ui::InstallWizard_InstallType *ui;
+    Ui::InstallWizard_Setup *ui;
 
     Settings *settings;
     bool isQuake3PatchRequired;

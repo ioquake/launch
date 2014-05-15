@@ -29,7 +29,7 @@ public:
 
     enum
     {
-        Page_InstallType,
+        Page_Setup,
         Page_Eula,
         Page_Copy,
         Page_Patch,

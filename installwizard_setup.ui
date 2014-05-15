@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>InstallWizard_InstallType</class>
- <widget class="QWizardPage" name="InstallWizard_InstallType">
+ <class>InstallWizard_Setup</class>
+ <widget class="QWizardPage" name="InstallWizard_Setup">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -2,14 +2,14 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include "installwizard_installtype.h"
-#include "ui_installwizard_installtype.h"
+#include "installwizard_setup.h"
+#include "ui_installwizard_setup.h"
 #include "installwizard.h"
 #include "settings.h"
 
-InstallWizard_InstallType::InstallWizard_InstallType(QWidget *parent, Settings *settings) :
+InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
     QWizardPage(parent),
-    ui(new Ui::InstallWizard_InstallType),
+    ui(new Ui::InstallWizard_Setup),
     settings(settings),
     isQuake3PatchRequired(false)
 {
@@ -22,12 +22,12 @@ InstallWizard_InstallType::InstallWizard_InstallType(QWidget *parent, Settings *
 #endif
 }
 
-InstallWizard_InstallType::~InstallWizard_InstallType()
+InstallWizard_Setup::~InstallWizard_Setup()
 {
     delete ui;
 }
 
-void InstallWizard_InstallType::initializePage()
+void InstallWizard_Setup::initializePage()
 {
     ui->txtLocatePath->setText(settings->getQuakePath());
 
@@ -47,7 +47,7 @@ void InstallWizard_InstallType::initializePage()
 #endif
 }
 
-bool InstallWizard_InstallType::validatePage()
+bool InstallWizard_Setup::validatePage()
 {
     if (ui->stackPages->currentIndex() == Page_Install)
     {
@@ -132,7 +132,7 @@ bool InstallWizard_InstallType::validatePage()
     return true;
 }
 
-bool InstallWizard_InstallType::isComplete() const
+bool InstallWizard_Setup::isComplete() const
 {
     if (ui->stackPages->currentIndex() == Page_Install)
     {
@@ -152,7 +152,7 @@ bool InstallWizard_InstallType::isComplete() const
     return true;
 }
 
-int InstallWizard_InstallType::nextId() const
+int InstallWizard_Setup::nextId() const
 {
     if (ui->stackPages->currentIndex() == Page_Install || ui->stackPages->currentIndex() == Page_InstallSteam)
     {
@@ -177,22 +177,22 @@ int InstallWizard_InstallType::nextId() const
     return InstallWizard::Page_Finished;
 }
 
-void InstallWizard_InstallType::on_rbLocate_clicked()
+void InstallWizard_Setup::on_rbLocate_clicked()
 {
     ui->stackPages->setCurrentIndex(Page_Locate);
 }
 
-void InstallWizard_InstallType::on_rbInstall_clicked()
+void InstallWizard_Setup::on_rbInstall_clicked()
 {
     ui->stackPages->setCurrentIndex(Page_Install);
 }
 
-void InstallWizard_InstallType::on_rbInstallSteam_clicked()
+void InstallWizard_Setup::on_rbInstallSteam_clicked()
 {
     ui->stackPages->setCurrentIndex(Page_InstallSteam);
 }
 
-void InstallWizard_InstallType::on_btnLocateBrowse_clicked()
+void InstallWizard_Setup::on_btnLocateBrowse_clicked()
 {
     const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake III Arena Location"), settings->getQuakePath());
 
@@ -203,12 +203,12 @@ void InstallWizard_InstallType::on_btnLocateBrowse_clicked()
     }
 }
 
-void InstallWizard_InstallType::on_txtLocatePath_textChanged(const QString & /*arg1*/)
+void InstallWizard_Setup::on_txtLocatePath_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }
 
-void InstallWizard_InstallType::on_btnInstallBrowseSource_clicked()
+void InstallWizard_Setup::on_btnInstallBrowseSource_clicked()
 {
     const QString location = QFileDialog::getOpenFileName(wizard(), "Select pak0.pk3 location", QString(), "Quake III Arena Pak File (pak0.pk3)");
 
@@ -218,7 +218,7 @@ void InstallWizard_InstallType::on_btnInstallBrowseSource_clicked()
     }
 }
 
-void InstallWizard_InstallType::on_btnInstallBrowseDest_clicked()
+void InstallWizard_Setup::on_btnInstallBrowseDest_clicked()
 {
     const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake III Arena Location"), ui->txtInstallDest->text());
 
@@ -228,17 +228,17 @@ void InstallWizard_InstallType::on_btnInstallBrowseDest_clicked()
     }
 }
 
-void InstallWizard_InstallType::on_txtInstallSource_textChanged(const QString & /*arg1*/)
+void InstallWizard_Setup::on_txtInstallSource_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }
 
-void InstallWizard_InstallType::on_txtInstallDest_textChanged(const QString & /*arg1*/)
+void InstallWizard_Setup::on_txtInstallDest_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }
 
-void InstallWizard_InstallType::on_btnInstallSteamBrowseSource_clicked()
+void InstallWizard_Setup::on_btnInstallSteamBrowseSource_clicked()
 {
     const QString location = QFileDialog::getExistingDirectory(this, tr("Select Steam Location"), ui->txtInstallSteamSource->text());
 
@@ -248,7 +248,7 @@ void InstallWizard_InstallType::on_btnInstallSteamBrowseSource_clicked()
     }
 }
 
-void InstallWizard_InstallType::on_btnInstallSteamBrowseDest_clicked()
+void InstallWizard_Setup::on_btnInstallSteamBrowseDest_clicked()
 {
     const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake III Arena Location"), ui->txtInstallSteamDest->text());
 
@@ -258,12 +258,12 @@ void InstallWizard_InstallType::on_btnInstallSteamBrowseDest_clicked()
     }
 }
 
-void InstallWizard_InstallType::on_txtInstallSteamSource_textChanged(const QString & /*arg1*/)
+void InstallWizard_Setup::on_txtInstallSteamSource_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }
 
-void InstallWizard_InstallType::on_txtInstallSteamDest_textChanged(const QString & /*arg1*/)
+void InstallWizard_Setup::on_txtInstallSteamDest_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }

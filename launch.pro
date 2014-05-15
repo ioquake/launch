@@ -16,7 +16,7 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     installwizard.cpp \
-    installwizard_installtype.cpp \
+    installwizard_setup.cpp \
     installwizard_finished.cpp \
     installwizard_patch.cpp \
     installwizard_eula.cpp \
@@ -25,7 +25,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     settings.h \
     installwizard.h \
-    installwizard_installtype.h \
+    installwizard_setup.h \
     installwizard_finished.h \
     installwizard_patch.h \
     installwizard_eula.h \
@@ -33,7 +33,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     installwizard.ui \
-    installwizard_installtype.ui \
+    installwizard_setup.ui \
     installwizard_finished.ui \
     installwizard_patch.ui \
     installwizard_eula.ui \
