@@ -21,8 +21,6 @@ public:
     enum
     {
         Page_InstallType,
-        Page_Locate,
-        Page_Install,
         Page_Eula,
         Page_Copy,
         Page_Patch,

@@ -2,10 +2,8 @@
 #include "installwizard.h"
 #include "ui_installwizard.h"
 #include "installwizard_installtype.h"
-#include "installwizard_locate.h"
 #include "installwizard_copy.h"
 #include "installwizard_eula.h"
-#include "installwizard_install.h"
 #include "installwizard_patch.h"
 #include "installwizard_finished.h"
 #include "settings.h"
@@ -26,17 +24,11 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     ui->setupUi(this);
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
 
-    setPage(Page_InstallType, new InstallWizard_InstallType(this));
-
-#ifdef Q_OS_WIN32
-    setPage(Page_Locate, new InstallWizard_LocatePage(this, settings));
-#endif
-
-    setPage(Page_Install, new InstallWizard_Install());
-    setPage(Page_Eula, new InstallWizard_Eula());
-    setPage(Page_Copy, new InstallWizard_Copy());
-    setPage(Page_Patch, new InstallWizard_Patch());
-    setPage(Page_Finished, new InstallWizard_Finished());
+    setPage(Page_InstallType, new InstallWizard_InstallType(this, settings));
+    setPage(Page_Eula, new InstallWizard_Eula(this));
+    setPage(Page_Copy, new InstallWizard_Copy(this));
+    setPage(Page_Patch, new InstallWizard_Patch(this));
+    setPage(Page_Finished, new InstallWizard_Finished(this));
 }
 
 InstallWizard::~InstallWizard()
