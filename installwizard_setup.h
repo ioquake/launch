@@ -36,7 +36,7 @@ private slots:
 
     void on_btnInstallBrowseDest_clicked();
 
-    void on_txtInstallSource_textChanged(const QString &arg1);
+    void on_cbInstallSource_currentTextChanged(const QString &arg1);
 
     void on_txtInstallDest_textChanged(const QString &arg1);
 
