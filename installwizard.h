@@ -18,6 +18,15 @@ public:
     explicit InstallWizard(QWidget *parent, Settings *settings);
     ~InstallWizard();
 
+    struct CopyFile
+    {
+        QString source;
+        QString dest;
+    };
+
+    void addCopyFile(const QString &source, const QString &dest);
+    const QList<CopyFile> &getCopyFiles() const;
+
     enum
     {
         Page_InstallType,
@@ -35,6 +44,7 @@ private:
     Ui::InstallWizard *ui;
     QPushButton *cancelButton;
     Settings *settings;
+    QList<CopyFile> copyFiles;
 };
 
 #endif // INSTALLWIZARD_H

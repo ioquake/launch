@@ -4,49 +4,49 @@
 #include "installwizard_copy.h"
 #include "ui_installwizard_copy.h"
 
-CopyWorker::CopyWorker() : isCancelled(false)
+CopyWorker::CopyWorker(const QList<InstallWizard::CopyFile> &copyFiles) : copyFiles(copyFiles), isCancelled(false)
 {
 }
 
-void CopyWorker::copy(const QString &source, const QString &destination)
+void CopyWorker::copy()
 {
-    QFile sourceFile(source);
-
-    if (!sourceFile.open(QIODevice::ReadOnly))
+    for (int i = 0; i < copyFiles.size(); i++)
     {
-        emit errorMessage(QString("'%1': %2").arg(source).arg(sourceFile.errorString()));
-        return;
-    }
+        QFile sourceFile(copyFiles.at(i).source);
 
-    QFile destinationFile(destination);
+        if (!sourceFile.open(QIODevice::ReadOnly))
+        {
+            emit errorMessage(QString("'%1': %2").arg(copyFiles.at(i).source).arg(sourceFile.errorString()));
+            return;
+        }
 
-    if (!destinationFile.open(QIODevice::WriteOnly))
-    {
-        emit errorMessage(QString("'%1': %2").arg(destination).arg(destinationFile.errorString()));
-        return;
-    }
+        QFile destinationFile(copyFiles.at(i).dest);
 
-    const qint64 totalBytes = sourceFile.size();
-    qint64 totalBytesWritten = 0;
+        if (!destinationFile.open(QIODevice::WriteOnly))
+        {
+            emit errorMessage(QString("'%1': %2").arg(copyFiles.at(i).dest).arg(destinationFile.errorString()));
+            return;
+        }
 
-    for (;;)
-    {
-        const qint64 bytesRead = sourceFile.read(buffer, bufferSize);
+        const qint64 totalBytes = sourceFile.size();
+        qint64 totalBytesWritten = 0;
 
-        if (bytesRead == 0)
-            break;
+        for (;;)
+        {
+            const qint64 bytesRead = sourceFile.read(buffer, bufferSize);
 
-        const qint64 bytesWritten = destinationFile.write(buffer, bytesRead);
-        totalBytesWritten += bytesWritten;
-        emit progressChanged(totalBytesWritten, totalBytes);
+            if (bytesRead == 0)
+                break;
 
-        /*if (totalBytesWritten > 1024 * 1024 * 10)
-            break;*/
+            const qint64 bytesWritten = destinationFile.write(buffer, bytesRead);
+            totalBytesWritten += bytesWritten;
+            emit progressChanged(totalBytesWritten, totalBytes);
 
-        QMutexLocker locker(&cancelMutex);
+            QMutexLocker locker(&cancelMutex);
 
-        if (isCancelled)
-            break;
+            if (isCancelled)
+                break;
+        }
     }
 
     emit copyFinished();
@@ -89,7 +89,7 @@ void InstallWizard_Copy::initializePage()
     }
 
     // Start copy thread.
-    copyWorker = new CopyWorker;
+    copyWorker = new CopyWorker(((InstallWizard *)wizard())->getCopyFiles());
     copyWorker->moveToThread(&copyThread);
     connect(&copyThread, &QThread::finished, copyWorker, &QObject::deleteLater);
     connect(this, &InstallWizard_Copy::copy, copyWorker, &CopyWorker::copy);
@@ -97,7 +97,8 @@ void InstallWizard_Copy::initializePage()
     connect(copyWorker, &CopyWorker::errorMessage, this, &InstallWizard_Copy::setCopyErrorMessage);
     connect(copyWorker, &CopyWorker::copyFinished, this, &InstallWizard_Copy::finishCopy);
     copyThread.start();
-    emit copy(field("pak0").toString(), quake3Path + QString("/pak0.pk3"));
+
+    emit copy();
 }
 
 bool InstallWizard_Copy::isComplete() const

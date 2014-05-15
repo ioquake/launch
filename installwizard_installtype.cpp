@@ -35,8 +35,6 @@ void InstallWizard_InstallType::initializePage()
     // Use the same default install directory as the Q3A installer.
     ui->txtInstallDest->setText(QString(qgetenv("PROGRAMFILES").constData()) + QString("\\Quake III Arena"));
 #endif
-
-    registerField("pak0", ui->txtInstallSource);
 }
 
 bool InstallWizard_InstallType::validatePage()
@@ -49,6 +47,8 @@ bool InstallWizard_InstallType::validatePage()
             return false;
         }
 
+        // Copy page will copy pak0.pk3.
+        ((InstallWizard *)wizard())->addCopyFile(ui->txtInstallSource->text(), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         registerField("quake3Path", ui->txtInstallDest);
     }
 #ifdef Q_OS_WIN32

@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QThread>
 #include <QWizardPage>
+#include "installwizard.h"
 
 namespace Ui {
 class InstallWizard_Copy;
@@ -14,11 +15,11 @@ class CopyWorker : public QObject
     Q_OBJECT
 
 public:
-    CopyWorker();
+    CopyWorker(const QList<InstallWizard::CopyFile> &copyFiles);
     void cancel();
 
 public slots:
-    void copy(const QString &source, const QString &destination);
+    void copy();
 
 signals:
     void progressChanged(qint64 bytesWritten, qint64 bytesTotal);
@@ -27,6 +28,7 @@ signals:
 
 private:
     static const int bufferSize = 32 * 1024;
+    const QList<InstallWizard::CopyFile> copyFiles;
     char buffer[bufferSize];
     bool isCancelled;
     QMutex cancelMutex;
@@ -49,7 +51,7 @@ private slots:
     void finishCopy();
 
 signals:
-    void copy(const QString &source, const QString &destination);
+    void copy();
 
 private:
     Ui::InstallWizard_Copy *ui;

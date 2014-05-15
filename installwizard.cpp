@@ -36,6 +36,19 @@ InstallWizard::~InstallWizard()
     delete ui;
 }
 
+void InstallWizard::addCopyFile(const QString &source, const QString &dest)
+{
+    CopyFile cf;
+    cf.source = source;
+    cf.dest = dest;
+    copyFiles.append(cf);
+}
+
+const QList<InstallWizard::CopyFile> &InstallWizard::getCopyFiles() const
+{
+    return copyFiles;
+}
+
 void InstallWizard::cancel()
 {
     if (currentId() == Page_Copy)
