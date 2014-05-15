@@ -37,6 +37,11 @@ InstallWizard::~InstallWizard()
     delete ui;
 }
 
+void InstallWizard::clearCopyFiles()
+{
+    copyFiles.clear();
+}
+
 void InstallWizard::addCopyFile(const QString &source, const QString &dest)
 {
     CopyFile cf;

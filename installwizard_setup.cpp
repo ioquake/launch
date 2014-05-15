@@ -72,6 +72,7 @@ bool InstallWizard_Setup::validatePage()
         iw->setIsQuake3PatchRequired(true);
 
         // Copy page will copy baseq3/pak0.pk3.
+        iw->clearCopyFiles();
         iw->addCopyFile(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         iw->setQuakePath(ui->txtInstallDest->text());
     }
@@ -97,6 +98,7 @@ bool InstallWizard_Setup::validatePage()
 
         // Copy page will copy baseq3/*.pk3 files.
         QFileInfoList pakFiles = steamQuakeDir.entryInfoList(QStringList("*.pk3"), QDir::Files | QDir::NoSymLinks | QDir::Readable, QDir::Name);
+        iw->clearCopyFiles();
 
         for (int i = 0; i < pakFiles.size(); i++)
         {

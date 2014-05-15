@@ -24,6 +24,7 @@ public:
         QString dest;
     };
 
+    void clearCopyFiles();
     void addCopyFile(const QString &source, const QString &dest);
     const QList<CopyFile> &getCopyFiles() const;
 

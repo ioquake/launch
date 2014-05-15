@@ -77,6 +77,7 @@ InstallWizard_Copy::~InstallWizard_Copy()
 
 void InstallWizard_Copy::initializePage()
 {
+    ui->lblStatus->setText("");
     isCopyFinished = false;
     copyFilename = QString();
 
