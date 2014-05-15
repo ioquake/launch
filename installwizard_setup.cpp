@@ -56,6 +56,8 @@ void InstallWizard_Setup::initializePage()
 
 bool InstallWizard_Setup::validatePage()
 {
+    InstallWizard *iw = (InstallWizard *)wizard();
+
     if (ui->stackPages->currentIndex() == Page_Install)
     {
         QDir dir(ui->cbInstallSource->currentText());
@@ -67,11 +69,11 @@ bool InstallWizard_Setup::validatePage()
         }
 
         // CD doesn't contain latest patch.
-        ((InstallWizard *)wizard())->setIsQuake3PatchRequired(true);
+        iw->setIsQuake3PatchRequired(true);
 
         // Copy page will copy baseq3/pak0.pk3.
-        ((InstallWizard *)wizard())->addCopyFile(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
-        registerField("quake3Path", ui->txtInstallDest);
+        iw->addCopyFile(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
+        iw->setQuakePath(ui->txtInstallDest->text());
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
     {
@@ -98,10 +100,10 @@ bool InstallWizard_Setup::validatePage()
 
         for (int i = 0; i < pakFiles.size(); i++)
         {
-            ((InstallWizard *)wizard())->addCopyFile(pakFiles.at(i).absoluteFilePath(), ui->txtInstallSteamDest->text() + QString("/baseq3/") + pakFiles.at(i).fileName());
+            iw->addCopyFile(pakFiles.at(i).absoluteFilePath(), ui->txtInstallSteamDest->text() + QString("/baseq3/") + pakFiles.at(i).fileName());
         }
 
-        registerField("quake3Path", ui->txtInstallSteamDest);
+        iw->setQuakePath(ui->txtInstallSteamDest->text());
     }
 #ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
@@ -125,7 +127,7 @@ bool InstallWizard_Setup::validatePage()
         {
             // pak1.pk3 doesn't exist, must be a fresh install.
             ((InstallWizard *)wizard())->setIsQuake3PatchRequired(true);
-            registerField("quake3Path", ui->txtLocatePath);
+            iw->setQuakePath(ui->txtLocatePath->text());
             return true;
         }
 
@@ -136,8 +138,8 @@ bool InstallWizard_Setup::validatePage()
         }
 
         const QByteArray hash = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5).toHex();
-        ((InstallWizard *)wizard())->setIsQuake3PatchRequired(hash != "48911719d91be25adb957f2d325db4a0");
-        registerField("quake3Path", ui->txtLocatePath);
+        iw->setIsQuake3PatchRequired(hash != "48911719d91be25adb957f2d325db4a0");
+        iw->setQuakePath(ui->txtLocatePath->text());
     }
 #endif
 

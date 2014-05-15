@@ -30,6 +30,9 @@ public:
     bool getIsQuake3PatchRequired() const;
     void setIsQuake3PatchRequired(bool value);
 
+    QString getQuakePath() const;
+    void setQuakePath(const QString &path);
+
     enum
     {
         Page_Setup,
@@ -49,6 +52,7 @@ private:
     Settings *settings;
     QList<CopyFile> copyFiles;
     bool isQuake3PatchRequired;
+    QString quakePath;
 };
 
 #endif // INSTALLWIZARD_H

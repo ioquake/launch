@@ -79,7 +79,7 @@ void InstallWizard_Copy::initializePage()
     isCopyFinished = false;
 
     // Try to create the destination directory and baseq3 subdirectory.
-    const QString quake3Path(field("quake3Path").toString() + QString("/baseq3"));
+    const QString quake3Path(((InstallWizard *)wizard())->getQuakePath() + QString("/baseq3"));
     QDir dir;
 
     if (!dir.mkpath(quake3Path))

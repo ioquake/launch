@@ -224,7 +224,7 @@ void InstallWizard_Patch::downloadFinished()
 
         if (strncmp(header.name, pakPrefix, strlen(pakPrefix)) == 0)
         {
-            QString filename(field("quake3Path").toString());
+            QString filename(((InstallWizard *)wizard())->getQuakePath());
             filename.append('/');
             filename.append(header.name);
 

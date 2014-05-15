@@ -60,6 +60,16 @@ void InstallWizard::setIsQuake3PatchRequired(bool value)
     isQuake3PatchRequired = value;
 }
 
+QString InstallWizard::getQuakePath() const
+{
+    return quakePath;
+}
+
+void InstallWizard::setQuakePath(const QString &path)
+{
+    quakePath = path;
+}
+
 void InstallWizard::cancel()
 {
     if (currentId() == Page_Copy)
@@ -79,7 +89,7 @@ void InstallWizard::on_InstallWizard_finished(int result)
 #ifdef Q_OS_WIN32
     if (result == QDialog::Accepted)
     {
-        settings->setQuakePath(field("quake3Path").toString());
+        settings->setQuakePath(quakePath);
     }
 #else
     result = result; // Silence warning.
