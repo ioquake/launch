@@ -131,4 +131,5 @@ void InstallWizard_Copy::finishCopy()
     copyThread.wait();
     isCopyFinished = true;
     emit completeChanged();
+    wizard()->next();
 }

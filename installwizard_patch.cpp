@@ -273,4 +273,5 @@ void InstallWizard_Patch::downloadFinished()
 
     isPatchInstalled = true;
     emit completeChanged();
+    wizard()->next();
 }
