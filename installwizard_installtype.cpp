@@ -33,7 +33,17 @@ void InstallWizard_InstallType::initializePage()
 
 #ifdef Q_OS_WIN32
     // Use the same default install directory as the Q3A installer.
-    ui->txtInstallDest->setText(QString(qgetenv("PROGRAMFILES").constData()) + QString("\\Quake III Arena"));
+    const QString windowsInstallDefault(QString(qgetenv("PROGRAMFILES").constData()) + QString("\\Quake III Arena"));
+    ui->txtInstallDest->setText(windowsInstallDefault);
+    ui->txtInstallSteamDest->setText(windowsInstallDefault);
+
+    // Try to get the Steam path from the registry.
+    QSettings registry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", QSettings::NativeFormat);
+
+    if (registry.contains("InstallPath"))
+    {
+        ui->txtInstallSteamSource->setText(registry.value("InstallPath").toString());
+    }
 #endif
 }
 
@@ -47,9 +57,39 @@ bool InstallWizard_InstallType::validatePage()
             return false;
         }
 
-        // Copy page will copy pak0.pk3.
+        // Copy page will copy baseq3/pak0.pk3.
         ((InstallWizard *)wizard())->addCopyFile(ui->txtInstallSource->text(), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         registerField("quake3Path", ui->txtInstallDest);
+    }
+    else if (ui->stackPages->currentIndex() == Page_InstallSteam)
+    {
+        // Check that the selected Steam path is valid.
+        QDir dir(ui->txtInstallSteamSource->text());
+
+        if (!dir.exists())
+        {
+            QMessageBox::warning(this, "Invalid Steam location", "The selected Steam location doesn't exist. Please select a valid directory.");
+            return false;
+        }
+
+        // Check that Q3A is installed (the baseq3 dir exists).
+        QDir steamQuakeDir(ui->txtInstallSteamSource->text() + QString("/steamapps/common/quake 3 arena/baseq3"));
+
+        if (!steamQuakeDir.exists())
+        {
+            QMessageBox::warning(this, "Steam Quake III Arena not installed", QString("Steam Quake III Arena not installed. Directory '%1' doesn't exist. Please select a valid directory.").arg(steamQuakeDir.path()));
+            return false;
+        }
+
+        // Copy page will copy baseq3/*.pk3 files.
+        QFileInfoList pakFiles = steamQuakeDir.entryInfoList(QStringList("*.pk3"), QDir::Files | QDir::NoSymLinks | QDir::Readable, QDir::Name);
+
+        for (int i = 0; i < pakFiles.size(); i++)
+        {
+            ((InstallWizard *)wizard())->addCopyFile(pakFiles.at(i).absoluteFilePath(), ui->txtInstallSteamDest->text() + QString("/baseq3/") + pakFiles.at(i).fileName());
+        }
+
+        registerField("quake3Path", ui->txtInstallSteamDest);
     }
 #ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
@@ -98,6 +138,10 @@ bool InstallWizard_InstallType::isComplete() const
     {
         return !ui->txtInstallSource->text().isEmpty() && !ui->txtInstallDest->text().isEmpty();
     }
+    else if (ui->stackPages->currentIndex() == Page_InstallSteam)
+    {
+        return !ui->txtInstallSteamSource->text().isEmpty() && !ui->txtInstallSteamDest->text().isEmpty();
+    }
 #ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
     {
@@ -110,7 +154,7 @@ bool InstallWizard_InstallType::isComplete() const
 
 int InstallWizard_InstallType::nextId() const
 {
-    if (ui->stackPages->currentIndex() == Page_Install)
+    if (ui->stackPages->currentIndex() == Page_Install || ui->stackPages->currentIndex() == Page_InstallSteam)
     {
         return InstallWizard::Page_Eula;
     }
@@ -141,6 +185,11 @@ void InstallWizard_InstallType::on_rbLocate_clicked()
 void InstallWizard_InstallType::on_rbInstall_clicked()
 {
     ui->stackPages->setCurrentIndex(Page_Install);
+}
+
+void InstallWizard_InstallType::on_rbInstallSteam_clicked()
+{
+    ui->stackPages->setCurrentIndex(Page_InstallSteam);
 }
 
 void InstallWizard_InstallType::on_btnLocateBrowse_clicked()
@@ -185,6 +234,36 @@ void InstallWizard_InstallType::on_txtInstallSource_textChanged(const QString & 
 }
 
 void InstallWizard_InstallType::on_txtInstallDest_textChanged(const QString & /*arg1*/)
+{
+    emit completeChanged();
+}
+
+void InstallWizard_InstallType::on_btnInstallSteamBrowseSource_clicked()
+{
+    const QString location = QFileDialog::getExistingDirectory(this, tr("Select Steam Location"), ui->txtInstallSteamSource->text());
+
+    if (!location.isEmpty())
+    {
+        ui->txtInstallSteamSource->setText(location);
+    }
+}
+
+void InstallWizard_InstallType::on_btnInstallSteamBrowseDest_clicked()
+{
+    const QString location = QFileDialog::getExistingDirectory(this, tr("Select Quake III Arena Location"), ui->txtInstallSteamDest->text());
+
+    if (!location.isEmpty())
+    {
+        ui->txtInstallSteamDest->setText(location);
+    }
+}
+
+void InstallWizard_InstallType::on_txtInstallSteamSource_textChanged(const QString & /*arg1*/)
+{
+    emit completeChanged();
+}
+
+void InstallWizard_InstallType::on_txtInstallSteamDest_textChanged(const QString & /*arg1*/)
 {
     emit completeChanged();
 }

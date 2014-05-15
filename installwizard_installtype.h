@@ -26,6 +26,8 @@ private slots:
 
     void on_rbInstall_clicked();
 
+    void on_rbInstallSteam_clicked();
+
     void on_btnLocateBrowse_clicked();
 
     void on_txtLocatePath_textChanged(const QString &arg1);
@@ -38,11 +40,20 @@ private slots:
 
     void on_txtInstallDest_textChanged(const QString &arg1);
 
+    void on_btnInstallSteamBrowseSource_clicked();
+
+    void on_btnInstallSteamBrowseDest_clicked();
+
+    void on_txtInstallSteamSource_textChanged(const QString &arg1);
+
+    void on_txtInstallSteamDest_textChanged(const QString &arg1);
+
 private:
     enum
     {
         Page_Locate,
-        Page_Install
+        Page_Install,
+        Page_InstallSteam
     };
 
     Ui::InstallWizard_InstallType *ui;
