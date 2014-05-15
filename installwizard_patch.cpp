@@ -124,6 +124,10 @@ void InstallWizard_Patch::downloadFinished()
     if (!isCancelled && networkReply->error())
     {
         ui->lblStatus->setText(networkReply->errorString());
+        networkReply->abort();
+        networkReply->deleteLater();
+        isCancelled = true;
+        return;
     }
 
     networkReply->deleteLater();
