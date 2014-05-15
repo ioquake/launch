@@ -28,6 +28,7 @@ void CopyWorker::copy()
             return;
         }
 
+        emit fileChanged(QFileInfo(sourceFile.fileName()).fileName());
         const qint64 totalBytes = sourceFile.size();
         qint64 totalBytesWritten = 0;
 
@@ -77,6 +78,7 @@ InstallWizard_Copy::~InstallWizard_Copy()
 void InstallWizard_Copy::initializePage()
 {
     isCopyFinished = false;
+    copyFilename = QString();
 
     // Try to create the destination directory and baseq3 subdirectory.
     const QString quake3Path(((InstallWizard *)wizard())->getQuakePath() + QString("/baseq3"));
@@ -93,6 +95,7 @@ void InstallWizard_Copy::initializePage()
     copyWorker->moveToThread(&copyThread);
     connect(&copyThread, &QThread::finished, copyWorker, &QObject::deleteLater);
     connect(this, &InstallWizard_Copy::copy, copyWorker, &CopyWorker::copy);
+    connect(copyWorker, &CopyWorker::fileChanged, this, &InstallWizard_Copy::setCopyFilename);
     connect(copyWorker, &CopyWorker::progressChanged, this, &InstallWizard_Copy::setCopyProgress);
     connect(copyWorker, &CopyWorker::errorMessage, this, &InstallWizard_Copy::setCopyErrorMessage);
     connect(copyWorker, &CopyWorker::copyFinished, this, &InstallWizard_Copy::finishCopy);
@@ -124,9 +127,14 @@ void InstallWizard_Copy::cancel()
     }
 }
 
+void InstallWizard_Copy::setCopyFilename(const QString &filename)
+{
+    copyFilename = filename;
+}
+
 void InstallWizard_Copy::setCopyProgress(qint64 bytesWritten, qint64 bytesTotal)
 {
-    ui->lblStatus->setText(QString("Copying %1MB / %2MB").arg(bytesWritten / 1024.0 / 1024.0, 0, 'f', 2).arg(bytesTotal / 1024.0 / 1024.0, 0, 'f', 2));
+    ui->lblStatus->setText(QString("Copying %1 (%2MB / %3MB)").arg(copyFilename).arg(bytesWritten / 1024.0 / 1024.0, 0, 'f', 2).arg(bytesTotal / 1024.0 / 1024.0, 0, 'f', 2));
     ui->pbProgress->setMaximum((int)bytesTotal);
     ui->pbProgress->setValue((int)bytesWritten);
 }

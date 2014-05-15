@@ -22,6 +22,7 @@ public slots:
     void copy();
 
 signals:
+    void fileChanged(const QString &filename);
     void progressChanged(qint64 bytesWritten, qint64 bytesTotal);
     void errorMessage(const QString &message);
     void copyFinished();
@@ -47,6 +48,7 @@ public:
     void cancel();
 
 private slots:
+    void setCopyFilename(const QString &filename);
     void setCopyProgress(qint64 bytesWritten, qint64 bytesTotal);
     void setCopyErrorMessage(const QString &message);
     void finishCopy();
@@ -59,6 +61,9 @@ private:
     CopyWorker *copyWorker;
     QThread copyThread;
     bool isCopyFinished;
+
+    // The name of the file currently being copied.
+    QString copyFilename;
 };
 
 #endif // INSTALLWIZARD_COPY_H
