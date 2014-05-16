@@ -21,7 +21,7 @@ public:
 
     void clearFileCopyOperations();
     void addFileCopyOperation(const QString &source, const QString &dest);
-    const QList<FileCopyOperation> &getFileCopyOperations() const;
+    const QList<FileOperation> &getFileCopyOperations() const;
 
     bool getIsQuake3PatchRequired() const;
     void setIsQuake3PatchRequired(bool value);
@@ -46,7 +46,7 @@ private:
     Ui::InstallWizard *ui;
     QPushButton *cancelButton;
     Settings *settings;
-    QList<FileCopyOperation> fileCopyOperations;
+    QList<FileOperation> fileCopyOperations;
     bool isQuake3PatchRequired;
     QString quakePath;
 };

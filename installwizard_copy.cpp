@@ -37,6 +37,7 @@ void InstallWizard_Copy::initializePage()
     }
 
     // Start copy thread.
+    qRegisterMetaType<QList<FileOperation> >("QList<FileOperation>");
     copyWorker = new FileCopyWorker(((InstallWizard *)wizard())->getFileCopyOperations());
     copyWorker->moveToThread(&copyThread);
     connect(&copyThread, &QThread::finished, copyWorker, &QObject::deleteLater);
@@ -90,10 +91,35 @@ void InstallWizard_Copy::setCopyErrorMessage(const QString &message)
     ui->lblStatus->setText(message);
 }
 
-void InstallWizard_Copy::finishCopy()
+void InstallWizard_Copy::finishCopy(QList<FileOperation> renameOperations)
 {
     copyThread.quit();
     copyThread.wait();
+
+    // Complete the transaction.
+    for (int i = 0; i < renameOperations.size(); i++)
+    {
+        const FileOperation &fo = renameOperations.at(i);
+        const QString randomDest = FileUtils::uniqueFilename(fo.dest);
+
+        // Rename dest to random.
+        if (!QFile::rename(fo.dest, randomDest))
+        {
+            ui->lblStatus->setText(QString("Transaction error renaming '%1' to '%2'").arg(fo.dest).arg(randomDest));
+            return;
+        }
+
+        // Rename source to dest.
+        if (!QFile::rename(fo.source, fo.dest))
+        {
+            ui->lblStatus->setText(QString("Transaction error renaming '%1' to '%2'").arg(fo.source).arg(fo.dest));
+            return;
+        }
+
+        // Delete random.
+        QFile::remove(randomDest);
+    }
+
     isCopyFinished = true;
     emit completeChanged();
     wizard()->next();

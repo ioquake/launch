@@ -20,16 +20,35 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#include <time.h>
 #include <QFile>
 #include <QFileInfo>
 #include "filecopy.h"
 
-FileCopyWorker::FileCopyWorker(const QList<FileCopyOperation> &files) : files(files), isCancelled(false)
+QString FileUtils::uniqueFilename(const QString &filename)
+{
+    QString unique;
+
+    for (;;)
+    {
+        QFileInfo fi(filename);
+        unique = fi.path() + QString("/") + QString::number(qrand(), 16) + QString("_") + fi.fileName();
+
+        if (!QFile::exists(unique))
+            break;
+    }
+
+    return unique;
+}
+
+FileCopyWorker::FileCopyWorker(const QList<FileOperation> &files) : files(files), isCancelled(false)
 {
 }
 
 void FileCopyWorker::copy()
 {
+    qsrand(time(NULL));
+
     for (int i = 0; i < files.size(); i++)
     {
         QFile sourceFile(files.at(i).source);
@@ -37,16 +56,22 @@ void FileCopyWorker::copy()
         if (!sourceFile.open(QIODevice::ReadOnly))
         {
             emit errorMessage(QString("'%1': %2").arg(files.at(i).source).arg(sourceFile.errorString()));
-            return;
+            goto cleanup;
         }
 
-        QFile destinationFile(files.at(i).dest);
+        const QString tempDestFilename = FileUtils::uniqueFilename(files.at(i).dest);
+        QFile destinationFile(tempDestFilename);
 
         if (!destinationFile.open(QIODevice::WriteOnly))
         {
-            emit errorMessage(QString("'%1': %2").arg(files.at(i).dest).arg(destinationFile.errorString()));
-            return;
+            emit errorMessage(QString("'%1': %2").arg(tempDestFilename).arg(destinationFile.errorString()));
+            goto cleanup;
         }
+
+        FileOperation fo;
+        fo.source = tempDestFilename;
+        fo.dest = files.at(i).dest;
+        renameOperations.append(fo);
 
         emit fileChanged(QFileInfo(sourceFile.fileName()).fileName());
         const qint64 totalBytes = sourceFile.size();
@@ -66,11 +91,20 @@ void FileCopyWorker::copy()
             QMutexLocker locker(&cancelMutex);
 
             if (isCancelled)
-                break;
+                goto cleanup;
         }
+
     }
 
-    emit copyFinished();
+    emit copyFinished(renameOperations);
+    return;
+
+    // Delete all the destination files.
+cleanup:
+    for (int i = 0; i < renameOperations.size(); i++)
+    {
+        QFile::remove(renameOperations.at(i).source);
+    }
 }
 
 void FileCopyWorker::cancel()

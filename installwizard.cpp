@@ -44,13 +44,13 @@ void InstallWizard::clearFileCopyOperations()
 
 void InstallWizard::addFileCopyOperation(const QString &source, const QString &dest)
 {
-    FileCopyOperation fco;
-    fco.source = source;
-    fco.dest = dest;
-    fileCopyOperations.append(fco);
+    FileOperation fo;
+    fo.source = source;
+    fo.dest = dest;
+    fileCopyOperations.append(fo);
 }
 
-const QList<FileCopyOperation> &InstallWizard::getFileCopyOperations() const
+const QList<FileOperation> &InstallWizard::getFileCopyOperations() const
 {
     return fileCopyOperations;
 }

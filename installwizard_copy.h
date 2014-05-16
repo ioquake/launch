@@ -26,7 +26,7 @@ private slots:
     void setCopyFilename(const QString &filename);
     void setCopyProgress(qint64 bytesWritten, qint64 bytesTotal);
     void setCopyErrorMessage(const QString &message);
-    void finishCopy();
+    void finishCopy(QList<FileOperation> renameOperations);
 
 signals:
     void copy();
