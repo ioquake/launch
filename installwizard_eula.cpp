@@ -16,7 +16,7 @@ InstallWizard_Eula::~InstallWizard_Eula()
 
 int InstallWizard_Eula::nextId() const
 {
-    if (!((InstallWizard *)wizard())->getCopyFiles().isEmpty())
+    if (!((InstallWizard *)wizard())->getFileCopyOperations().isEmpty())
     {
         return InstallWizard::Page_Copy;
     }

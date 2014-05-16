@@ -37,22 +37,22 @@ InstallWizard::~InstallWizard()
     delete ui;
 }
 
-void InstallWizard::clearCopyFiles()
+void InstallWizard::clearFileCopyOperations()
 {
-    copyFiles.clear();
+    fileCopyOperations.clear();
 }
 
-void InstallWizard::addCopyFile(const QString &source, const QString &dest)
+void InstallWizard::addFileCopyOperation(const QString &source, const QString &dest)
 {
-    CopyFile cf;
-    cf.source = source;
-    cf.dest = dest;
-    copyFiles.append(cf);
+    FileCopyOperation fco;
+    fco.source = source;
+    fco.dest = dest;
+    fileCopyOperations.append(fco);
 }
 
-const QList<InstallWizard::CopyFile> &InstallWizard::getCopyFiles() const
+const QList<FileCopyOperation> &InstallWizard::getFileCopyOperations() const
 {
-    return copyFiles;
+    return fileCopyOperations;
 }
 
 bool InstallWizard::getIsQuake3PatchRequired() const

@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     installwizard_finished.cpp \
     installwizard_patch.cpp \
     installwizard_eula.cpp \
-    installwizard_copy.cpp
+    installwizard_copy.cpp \
+    filecopy.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     installwizard_finished.h \
     installwizard_patch.h \
     installwizard_eula.h \
-    installwizard_copy.h
+    installwizard_copy.h \
+    filecopy.h
 
 FORMS    += mainwindow.ui \
     installwizard.ui \

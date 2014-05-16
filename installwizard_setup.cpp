@@ -72,8 +72,8 @@ bool InstallWizard_Setup::validatePage()
         iw->setIsQuake3PatchRequired(true);
 
         // Copy page will copy baseq3/pak0.pk3.
-        iw->clearCopyFiles();
-        iw->addCopyFile(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
+        iw->clearFileCopyOperations();
+        iw->addFileCopyOperation(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         iw->setQuakePath(ui->txtInstallDest->text());
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
@@ -98,11 +98,11 @@ bool InstallWizard_Setup::validatePage()
 
         // Copy page will copy baseq3/*.pk3 files.
         QFileInfoList pakFiles = steamQuakeDir.entryInfoList(QStringList("*.pk3"), QDir::Files | QDir::NoSymLinks | QDir::Readable, QDir::Name);
-        iw->clearCopyFiles();
+        iw->clearFileCopyOperations();
 
         for (int i = 0; i < pakFiles.size(); i++)
         {
-            iw->addCopyFile(pakFiles.at(i).absoluteFilePath(), ui->txtInstallSteamDest->text() + QString("/baseq3/") + pakFiles.at(i).fileName());
+            iw->addFileCopyOperation(pakFiles.at(i).absoluteFilePath(), ui->txtInstallSteamDest->text() + QString("/baseq3/") + pakFiles.at(i).fileName());
         }
 
         iw->setQuakePath(ui->txtInstallSteamDest->text());

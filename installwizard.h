@@ -2,6 +2,7 @@
 #define INSTALLWIZARD_H
 
 #include <QWizard>
+#include "filecopy.h"
 
 namespace Ui {
 class InstallWizard;
@@ -18,15 +19,9 @@ public:
     explicit InstallWizard(QWidget *parent, Settings *settings);
     ~InstallWizard();
 
-    struct CopyFile
-    {
-        QString source;
-        QString dest;
-    };
-
-    void clearCopyFiles();
-    void addCopyFile(const QString &source, const QString &dest);
-    const QList<CopyFile> &getCopyFiles() const;
+    void clearFileCopyOperations();
+    void addFileCopyOperation(const QString &source, const QString &dest);
+    const QList<FileCopyOperation> &getFileCopyOperations() const;
 
     bool getIsQuake3PatchRequired() const;
     void setIsQuake3PatchRequired(bool value);
@@ -51,7 +46,7 @@ private:
     Ui::InstallWizard *ui;
     QPushButton *cancelButton;
     Settings *settings;
-    QList<CopyFile> copyFiles;
+    QList<FileCopyOperation> fileCopyOperations;
     bool isQuake3PatchRequired;
     QString quakePath;
 };
