@@ -20,6 +20,13 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#include <Qt>
+
+#ifdef Q_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 #include <QCryptographicHash>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -44,10 +51,39 @@ InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
 
     // Populate drives list.
     QFileInfoList drives = QDir::drives();
+    int selectIndex = -1;
 
     for (int i = 0; i < drives.size(); i++)
     {
-        ui->cbInstallSource->addItem(drives.at(i).absoluteFilePath());
+        const QString path(drives.at(i).absoluteFilePath());
+        QString text(path);
+
+        // Windows: get the volume name. If it's "Quake3", select this drive.
+#ifdef Q_OS_WIN32
+        WCHAR volumeNameRaw[128];
+
+        if (GetVolumeInformation((LPCWSTR)path.utf16(), volumeNameRaw, sizeof(volumeNameRaw), NULL, NULL, NULL, NULL, 0))
+        {
+            QString volumeName(QString::fromWCharArray(volumeNameRaw));
+
+            if (!volumeName.isEmpty())
+            {
+                text = QString("%1 (%2)").arg(path).arg(volumeName);
+
+                if (volumeName == "Quake3")
+                {
+                    selectIndex = i;
+                }
+            }
+        }
+#endif
+
+        ui->cbInstallSource->addItem(text, path);
+    }
+
+    if (selectIndex != -1)
+    {
+        ui->cbInstallSource->setCurrentIndex(selectIndex);
     }
 }
 
@@ -82,7 +118,7 @@ bool InstallWizard_Setup::validatePage()
 
     if (ui->stackPages->currentIndex() == Page_Install)
     {
-        QDir dir(ui->cbInstallSource->currentText());
+        QDir dir(ui->cbInstallSource->currentData().toString());
 
         if (!dir.exists())
         {
@@ -95,7 +131,7 @@ bool InstallWizard_Setup::validatePage()
 
         // Copy page will copy baseq3/pak0.pk3.
         iw->clearFileCopyOperations();
-        iw->addFileCopyOperation(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
+        iw->addFileCopyOperation(ui->cbInstallSource->currentData().toString() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         iw->setQuakePath(ui->txtInstallDest->text());
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
@@ -174,7 +210,7 @@ bool InstallWizard_Setup::isComplete() const
 {
     if (ui->stackPages->currentIndex() == Page_Install)
     {
-        return !ui->cbInstallSource->currentText().isEmpty() && !ui->txtInstallDest->text().isEmpty();
+        return !ui->cbInstallSource->currentData().toString().isEmpty() && !ui->txtInstallDest->text().isEmpty();
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
     {
@@ -248,11 +284,20 @@ void InstallWizard_Setup::on_txtLocatePath_textChanged(const QString & /*arg1*/)
 
 void InstallWizard_Setup::on_btnInstallBrowseSource_clicked()
 {
-    const QString location = QFileDialog::getExistingDirectory(wizard(), "Select Quake III Arena CD-ROM directory", ui->cbInstallSource->currentText());
+    const QString location = QFileDialog::getExistingDirectory(wizard(), "Select Quake III Arena CD-ROM directory", ui->cbInstallSource->currentData().toString());
 
     if (!location.isEmpty())
     {
-        ui->cbInstallSource->setCurrentText(location);
+        // Find or add.
+        int index = ui->cbInstallSource->findText(location, Qt::MatchFixedString);
+
+        if (index == -1)
+        {
+            ui->cbInstallSource->addItem(location, location);
+            index = ui->cbInstallSource->count() - 1;
+        }
+
+        ui->cbInstallSource->setCurrentIndex(index);
     }
 }
 
