@@ -59,19 +59,35 @@ void FileCopyWorker::copy()
             goto cleanup;
         }
 
-        const QString tempDestFilename = FileUtils::uniqueFilename(files.at(i).dest);
-        QFile destinationFile(tempDestFilename);
+        // Write to the destination file if it doesn't exist, otherwise write to a uniquely named file.
+        const bool destExists = QFile::exists(files.at(i).dest);
+        QString destFilename;
+
+        if (destExists)
+        {
+            destFilename = FileUtils::uniqueFilename(files.at(i).dest);
+        }
+        else
+        {
+            destFilename = files.at(i).dest;
+        }
+
+        QFile destinationFile(destFilename);
 
         if (!destinationFile.open(QIODevice::WriteOnly))
         {
-            emit errorMessage(QString("'%1': %2").arg(tempDestFilename).arg(destinationFile.errorString()));
+            emit errorMessage(QString("'%1': %2").arg(destFilename).arg(destinationFile.errorString()));
             goto cleanup;
         }
 
-        FileOperation fo;
-        fo.source = tempDestFilename;
-        fo.dest = files.at(i).dest;
-        renameOperations.append(fo);
+        // Don't add a rename operation if the destination file doesn't exist - not trying to overwrite, don't need to rename anything to complete the transaction.
+        if (destExists)
+        {
+            FileOperation fo;
+            fo.source = destFilename;
+            fo.dest = files.at(i).dest;
+            renameOperations.append(fo);
+        }
 
         emit fileChanged(QFileInfo(sourceFile.fileName()).fileName());
         const qint64 totalBytes = sourceFile.size();
