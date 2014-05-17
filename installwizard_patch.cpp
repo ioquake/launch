@@ -79,9 +79,9 @@ void InstallWizard_Patch::initializePage()
     patchFile->open();
 
     networkReply = nam.get(QNetworkRequest(QUrl("http://localhost:8080/linuxq3apoint-1.32b-3.x86.run")));
-    connect(networkReply, SIGNAL(readyRead()), this, SLOT(downloadRead()));
-    connect(networkReply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
-    connect(networkReply, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(networkReply, &QNetworkReply::readyRead, this, &InstallWizard_Patch::downloadRead);
+    connect(networkReply, &QNetworkReply::downloadProgress, this, &InstallWizard_Patch::downloadProgress);
+    connect(networkReply, &QNetworkReply::finished, this, &InstallWizard_Patch::downloadFinished);
 }
 
 void InstallWizard_Patch::cleanupPage()

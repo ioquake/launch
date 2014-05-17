@@ -45,7 +45,7 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
     setButtonLayout(layout);
 
     ui->setupUi(this);
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(cancelButton, &QPushButton::clicked, this, &InstallWizard::cancel);
 
     setPage(Page_Setup, new InstallWizard_Setup(this, settings));
     setPage(Page_Eula, new InstallWizard_Eula(this));
