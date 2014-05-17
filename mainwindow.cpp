@@ -1,16 +1,10 @@
-#include <Qt>
+#include <QDir>
+#include <QMessageBox>
 #include <QProcess>
-#include <QTextStream>
-
-#ifdef Q_OS_WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <shlobj.h>
-#endif
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "installwizard.h"
+#include "quakeutils.h"
 
 ioLaunch::ioLaunch(QWidget *parent) :
     QMainWindow(parent),
@@ -18,45 +12,21 @@ ioLaunch::ioLaunch(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Calculate ioquake3 home path.
-#ifdef Q_OS_WIN32
-    wchar_t path[MAX_PATH];
-
-    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
-    {
-        homePath = QString::fromWCharArray(path) + "/Quake3";
-    }
-#elif defined(Q_OS_MAC) || defined(Q_OS_UNIX)
-    const QByteArray homeEnvRaw = qgetenv("HOME");
-    const QString homeEnv(homeEnvRaw.constData());
-
-    #if defined Q_OS_MAC
-    homePath = homeEnv + "/Library/Application Support/Quake3";
-    #elif defined Q_OS_UNIX
-    homePath = homeEnv + "/.q3a";
-    #endif
-#endif
-
-    QDir homeDir(homePath);
+    // Calculate the ioquake3 home path.
+    const QString homePath = QuakeUtils::calculateHomePath();
+    const QDir homeDir(homePath);
 
     // Try to parse q3config.cfg to get default settings if this is the first time the program has run.
     if (!homePath.isEmpty() && homeDir.exists() && !settings.getHaveRun())
     {
-        parseQuake3Config();
+        QuakeUtils::parseQuake3Config(&settings, homePath);
     }
 
-#ifdef Q_OS_WIN32
-    // On first run, try to get the Q3A path on Windows by reading it from the registry.
+    // On first run, try to get the Q3A path.
     if (!settings.getHaveRun())
     {
-        QSettings registry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Id\\Quake III Arena", QSettings::NativeFormat);
-
-        if (registry.contains("INSTALLPATH"))
-        {
-            settings.setQuakePath(registry.value("INSTALLPATH").toString());
-        }
+        settings.setQuakePath(QuakeUtils::calculateQuake3Path());
     }
-#endif
 
     settings.setHaveRun(true);
 
@@ -221,46 +191,6 @@ void ioLaunch::on_btnRunInstallWizard_clicked()
     wizard.exec();
 }
 
-// Since q3config.cfg is generated it's nice and clean and shouldn't need a full parser.
-static QString ParseToken(const QString &s, int &offset)
-{
-    // Skip whitespace.
-    while (offset < s.length() && s[offset] == ' ')
-    {
-        offset++;
-    }
-
-    if (offset >= s.length())
-        return QString();
-
-    // Check for quoted token.
-    bool quoted = s[offset] == '\"';
-
-    if (quoted)
-        offset++;
-
-    // Parse token.
-    int start = offset;
-
-    while (offset < s.length() && ((quoted && s[offset] != '\"') || (!quoted && s[offset] != ' ')))
-    {
-        offset++;
-    }
-
-    // Get token substring.
-    int end = offset;
-
-    if (quoted && s[offset] == '\"')
-    {
-        offset++;
-    }
-
-    if (end - start <= 0)
-        return QString();
-
-    return s.mid(start, end - start);
-}
-
 #ifdef Q_OS_WIN32
 bool ioLaunch::isQuake3PathValid() const
 {
@@ -270,46 +200,3 @@ bool ioLaunch::isQuake3PathValid() const
     return !settings.getQuakePath().isEmpty() && QDir(settings.getQuakePath()).exists();
 }
 #endif
-
-void ioLaunch::parseQuake3Config()
-{
-    QFile file(homePath + "/baseq3/q3config.cfg");
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
-
-    QTextStream stream(&file);
-
-    while (!stream.atEnd())
-    {
-        const QString line(stream.readLine());
-
-        // Skip comments.
-        if (line.startsWith("//"))
-            continue;
-
-        int offset = 0;
-
-        if (ParseToken(line, offset) == "seta")
-        {
-            const QString cvar(ParseToken(line, offset));
-
-            if (cvar == "r_mode")
-            {
-                settings.setResolutionMode(ParseToken(line, offset).toInt());
-            }
-            else if (cvar == "r_customwidth")
-            {
-                settings.setResolutionWidth(ParseToken(line, offset).toInt());
-            }
-            else if (cvar == "r_customheight")
-            {
-                settings.setResolutionHeight(ParseToken(line, offset).toInt());
-            }
-            else if (cvar == "r_fullscreen")
-            {
-                settings.setResolutionFullscreen(ParseToken(line, offset).toInt() != 0);
-            }
-        }
-    }
-}

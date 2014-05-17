@@ -2,12 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QDesktopWidget>
-#include <QMessageBox>
-#include <QString>
-#include <QtGlobal>
-#include <QFileDialog>
-#include <QDir>
 #include "settings.h"
 
 namespace Ui {
@@ -43,11 +37,8 @@ private:
     bool isQuake3PathValid() const;
 #endif
 
-    void parseQuake3Config();
-
     Ui::ioLaunch *ui;
     Settings settings;
-    QString homePath;
 };
 
 #endif // MAINWINDOW_H
