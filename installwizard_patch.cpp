@@ -20,67 +20,49 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include <math.h>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QtZlib/zlib.h>
 #include "installwizard_patch.h"
 #include "ui_installwizard_patch.h"
 #include "installwizard.h"
-
-struct TarHeader
-{
-    char name[100];
-    char mode[8];
-    char uid[8];
-    char gid[8];
-    char size[12];
-    char mtime[12];
-    char chksum[8];
-    char typeflag;
-    char linkname[100];
-    char magic[6];
-    char version[2];
-    char uname[32];
-    char gname[32];
-    char devmajor[8];
-    char devminor[8];
-    char prefix[155];
-};
+#include "fileextract.h"
 
 InstallWizard_Patch::InstallWizard_Patch(QWidget *parent) :
     QWizardPage(parent),
     ui(new Ui::InstallWizard_Patch),
     patchFile(NULL),
-    unzippedPatchFile(NULL),
     networkReply(NULL),
     isCancelled(false),
     isDownloadFinished(false),
     isPatchInstalled(false),
-    usePatchFileBuffer(true)
+    usePatchFileBuffer(true),
+    extractWorker(NULL),
+    isExtractFinished(false)
 {
     ui->setupUi(this);
 }
 
 InstallWizard_Patch::~InstallWizard_Patch()
 {
+    extractThread.quit();
+    extractThread.wait();
     delete patchFile;
-    delete unzippedPatchFile;
     delete ui;
 }
 
 void InstallWizard_Patch::initializePage()
 {
-    isCancelled = isDownloadFinished = isPatchInstalled = false;
+    isCancelled = isDownloadFinished = isPatchInstalled = isExtractFinished = false;
     patchFileBuffer.clear();
     usePatchFileBuffer = true;
+    extractWorker = NULL;
 
     patchFile = new QTemporaryFile;
     patchFile->open();
 
     networkReply = nam.get(QNetworkRequest(QUrl("http://localhost:8080/linuxq3apoint-1.32b-3.x86.run")));
     connect(networkReply, &QNetworkReply::readyRead, this, &InstallWizard_Patch::downloadRead);
-    connect(networkReply, &QNetworkReply::downloadProgress, this, &InstallWizard_Patch::downloadProgress);
+    connect(networkReply, &QNetworkReply::downloadProgress, this, &InstallWizard_Patch::updateProgress);
     connect(networkReply, &QNetworkReply::finished, this, &InstallWizard_Patch::downloadFinished);
 }
 
@@ -91,7 +73,7 @@ void InstallWizard_Patch::cleanupPage()
 
 bool InstallWizard_Patch::isComplete() const
 {
-    return isDownloadFinished && isPatchInstalled;
+    return isDownloadFinished && isExtractFinished && isPatchInstalled;
 }
 
 void InstallWizard_Patch::cancel()
@@ -101,11 +83,14 @@ void InstallWizard_Patch::cancel()
 
     delete patchFile;
     patchFile = NULL;
-    delete unzippedPatchFile;
-    unzippedPatchFile = NULL;
 
     if (!isDownloadFinished)
         networkReply->abort();
+
+    if (!isExtractFinished)
+    {
+        extractWorker->cancel();
+    }
 
     isCancelled = true;
 }
@@ -132,13 +117,6 @@ void InstallWizard_Patch::downloadRead()
     }
 }
 
-void InstallWizard_Patch::downloadProgress(qint64 bytesRead, qint64 bytesTotal)
-{
-    ui->lblStatus->setText(QString("Downloading %1MB / %2MB").arg(bytesRead / 1024.0 / 1024.0, 0, 'f', 2).arg(bytesTotal / 1024.0 / 1024.0, 0, 'f', 2));
-    ui->pbProgress->setMaximum((int)bytesTotal);
-    ui->pbProgress->setValue((int)bytesRead);
-}
-
 void InstallWizard_Patch::downloadFinished()
 {
     Q_ASSERT(networkReply);
@@ -159,142 +137,70 @@ void InstallWizard_Patch::downloadFinished()
 
     isDownloadFinished = true;
 
-    // Extract gzip compressed archive.
-    ui->lblStatus->setText("Installing...");
+    // Build a list of pak files to extract.
+    QList<FileOperation> filesToExtract;
 
-    z_stream zstream;
-    zstream.zalloc = Z_NULL;
-    zstream.zfree = Z_NULL;
-    zstream.opaque = Z_NULL;
-    zstream.avail_in = 0;
-    zstream.next_in = Z_NULL;
-
-    int result = inflateInit2(&zstream, 32 | MAX_WBITS);
-
-    if (result != Z_OK)
+    for (int i = 1; i <= 8; i++)
     {
-        ui->lblStatus->setText("zlib inflateInit2 failed");
-        cancel();
+        FileOperation fo;
+        fo.source = QString("baseq3/pak%1.pk3").arg(i);
+        fo.dest = QString("%1/baseq3/pak%2.pk3").arg(((InstallWizard *)wizard())->getQuakePath()).arg(i);
+        filesToExtract.append(fo);
+    }
+
+    // Start extract thread.
+    qRegisterMetaType<QList<FileOperation> >("QList<FileOperation>");
+    extractWorker = new FileExtractWorker(patchFile->fileName(), filesToExtract);
+    extractWorker->moveToThread(&extractThread);
+    connect(&extractThread, &QThread::finished, extractWorker, &QObject::deleteLater);
+    connect(this, &InstallWizard_Patch::extract, extractWorker, &FileExtractWorker::extract);
+    connect(extractWorker, &FileExtractWorker::fileChanged, this, &InstallWizard_Patch::setExtractFilename);
+    connect(extractWorker, &FileExtractWorker::progressChanged, this, &InstallWizard_Patch::updateProgress);
+    connect(extractWorker, &FileExtractWorker::errorMessage, this, &InstallWizard_Patch::setErrorMessage);
+    connect(extractWorker, &FileExtractWorker::finished, this, &InstallWizard_Patch::finishExtract);
+    extractThread.start();
+    emit extract();
+}
+
+void InstallWizard_Patch::updateProgress(qint64 bytesRead, qint64 bytesTotal)
+{
+    if (!isDownloadFinished)
+    {
+        ui->lblStatus->setText(QString("Downloading %1MB / %2MB").arg(bytesRead / 1024.0 / 1024.0, 0, 'f', 2).arg(bytesTotal / 1024.0 / 1024.0, 0, 'f', 2));
+    }
+    else if (!isExtractFinished)
+    {
+        ui->lblStatus->setText(QString("Extracting %1 %2MB / %3MB").arg(extractFilename).arg(bytesRead / 1024.0 / 1024.0, 0, 'f', 2).arg(bytesTotal / 1024.0 / 1024.0, 0, 'f', 2));
+    }
+
+    ui->pbProgress->setMaximum((int)bytesTotal);
+    ui->pbProgress->setValue((int)bytesRead);
+}
+
+void InstallWizard_Patch::setExtractFilename(const QString &filename)
+{
+    extractFilename = filename;
+}
+
+void InstallWizard_Patch::setErrorMessage(const QString &message)
+{
+    ui->lblStatus->setText(message);
+}
+
+void InstallWizard_Patch::finishExtract(QList<FileOperation> renameOperations)
+{
+    extractThread.quit();
+    extractThread.wait();
+    isExtractFinished = true;
+    emit completeChanged();
+
+    // Complete the transaction.
+    const QString transactionError = FileUtils::completeTransaction(renameOperations);
+
+    if (!transactionError.isEmpty())
+    {
+        ui->lblStatus->setText(transactionError);
         return;
-    }
-
-    patchFile->seek(0);
-    unzippedPatchFile = new QTemporaryFile;
-    unzippedPatchFile->open();
-
-    const int bufferSize = 32 * 1024;
-    static char inputBuffer[bufferSize];
-    static char outputBuffer[bufferSize];
-
-    do
-    {
-        qint64 bytesRead = patchFile->read(inputBuffer, bufferSize);
-
-        if (bytesRead == 0)
-            break;
-
-        zstream.avail_in = bytesRead;
-        zstream.next_in = (z_Bytef *)inputBuffer;
-
-        do
-        {
-            zstream.avail_out = bufferSize;
-            zstream.next_out = (z_Bytef *)outputBuffer;
-
-            result = inflate(&zstream, Z_NO_FLUSH);
-
-            if (result != Z_OK && result != Z_STREAM_END)
-            {
-                ui->lblStatus->setText(QString("zlib error %1").arg(result));
-                inflateEnd(&zstream);
-                cancel();
-                return;
-            }
-
-            unzippedPatchFile->write(outputBuffer, bufferSize - zstream.avail_out);
-        }
-        while (zstream.avail_out == 0);
-    }
-    while (result != Z_STREAM_END);
-
-    inflateEnd(&zstream);
-
-    // Extract all the baseq3 pk3 files in the TAR file.
-    unzippedPatchFile->seek(0);
-    int nPaksExtracted = 0;
-
-    for (;;)
-    {
-        // Read TAR file header (padded to 512 bytes).
-        TarHeader header;
-        unzippedPatchFile->read((char *)&header, sizeof(header));
-        unzippedPatchFile->seek(unzippedPatchFile->pos() + 512 - sizeof(header));
-
-        // Convert size from octal string.
-        qint64 size = 0;
-        int exponent = 0;
-
-        for (int i = sizeof(header.size) - 1; i >= 0; i--)
-        {
-            int digit = (int)(header.size[i] - '0');
-
-            if (digit < 0 || digit > 7)
-                continue;
-
-            size += qint64(digit * pow(8.0f, exponent));
-            exponent++;
-        }
-
-        // Extract a pk3 file.
-        const char *pakPrefix = "baseq3/pak";
-
-        if (strncmp(header.name, pakPrefix, strlen(pakPrefix)) == 0)
-        {
-            QString filename(((InstallWizard *)wizard())->getQuakePath());
-            filename.append('/');
-            filename.append(header.name);
-
-            QFile file(filename);
-
-            if (!file.open(QIODevice::WriteOnly))
-            {
-                ui->lblStatus->setText(QString("Error opening '%1' for writing").arg(filename));
-                cancel();
-                return;
-            }
-
-            qint64 totalBytesRead = 0;
-
-            for (;;)
-            {
-                qint64 bytesToRead = bufferSize;
-
-                if (totalBytesRead + bytesToRead > size)
-                {
-                    bytesToRead = size - totalBytesRead;
-                }
-
-                const qint64 bytesRead = unzippedPatchFile->read(outputBuffer, bytesToRead);
-
-                if (bytesRead == 0)
-                    break;
-
-                file.write(outputBuffer, bytesRead);
-                totalBytesRead += bytesRead;
-            }
-
-            nPaksExtracted++;
-        }
-        else
-        {
-            unzippedPatchFile->seek(unzippedPatchFile->pos() + size);
-        }
-
-        // TAR file size is padded to 512 byte blocks.
-        unzippedPatchFile->seek(unzippedPatchFile->pos() + ((size % 512) == 0 ? 0 : 512 - (size % 512)));
-
-        if (nPaksExtracted == 8)
-            break;
     }
 
     isPatchInstalled = true;

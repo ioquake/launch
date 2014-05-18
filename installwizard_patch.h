@@ -25,11 +25,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QNetworkAccessManager>
 #include <QTemporaryFile>
+#include <QThread>
 #include <QWizardPage>
+#include "filecopy.h"
 
 namespace Ui {
 class InstallWizard_Patch;
 }
+
+class FileExtractWorker;
 
 class InstallWizard_Patch : public QWizardPage
 {
@@ -45,12 +49,18 @@ public:
 
 private slots:
     void downloadRead();
-    void downloadProgress(qint64 bytesRead, qint64 bytesTotal);
     void downloadFinished();
+    void updateProgress(qint64 bytesRead, qint64 bytesTotal);
+    void setExtractFilename(const QString &filename);
+    void setErrorMessage(const QString &message);
+    void finishExtract(QList<FileOperation> renameOperations);
+
+signals:
+    void extract();
 
 private:
     Ui::InstallWizard_Patch *ui;
-    QTemporaryFile *patchFile, *unzippedPatchFile;
+    QTemporaryFile *patchFile;
     QNetworkAccessManager nam;
     QNetworkReply *networkReply;
     bool isCancelled;
@@ -58,6 +68,11 @@ private:
     bool isPatchInstalled;
     bool usePatchFileBuffer;
     QByteArray patchFileBuffer;
+
+    QString extractFilename;
+    FileExtractWorker *extractWorker;
+    QThread extractThread;
+    bool isExtractFinished;
 };
 
 #endif // INSTALLWIZARD_PATCH_H

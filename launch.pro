@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     installwizard_eula.cpp \
     installwizard_copy.cpp \
     filecopy.cpp \
-    quakeutils.cpp
+    quakeutils.cpp \
+    fileextract.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     installwizard_eula.h \
     installwizard_copy.h \
     filecopy.h \
-    quakeutils.h
+    quakeutils.h \
+    fileextract.h
 
 FORMS    += mainwindow.ui \
     installwizard.ui \

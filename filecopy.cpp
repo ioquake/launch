@@ -41,6 +41,32 @@ QString FileUtils::uniqueFilename(const QString &filename)
     return unique;
 }
 
+QString FileUtils::completeTransaction(const QList<FileOperation> &renameOperations)
+{
+    for (int i = 0; i < renameOperations.size(); i++)
+    {
+        const FileOperation &fo = renameOperations.at(i);
+        const QString randomDest = FileUtils::uniqueFilename(fo.dest);
+
+        // Rename dest to random.
+        if (!QFile::rename(fo.dest, randomDest))
+        {
+            return QString("Transaction error renaming '%1' to '%2'").arg(fo.dest).arg(randomDest);
+        }
+
+        // Rename source to dest.
+        if (!QFile::rename(fo.source, fo.dest))
+        {
+            return QString("Transaction error renaming '%1' to '%2'").arg(fo.source).arg(fo.dest);
+        }
+
+        // Delete random.
+        QFile::remove(randomDest);
+    }
+
+    return QString();
+}
+
 FileCopyWorker::FileCopyWorker(const QList<FileOperation> &files) : files(files), isCancelled(false)
 {
 }

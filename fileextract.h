@@ -20,69 +20,39 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef FILECOPY_H
-#define FILECOPY_H
+#ifndef FILEEXTRACT_H
+#define FILEEXTRACT_H
 
 #include <QList>
 #include <QObject>
 #include <QMutex>
+#include <QTemporaryFile>
+#include "filecopy.h"
 
-struct FileOperation
-{
-    QString source;
-    QString dest;
-};
-
-class FileUtils
-{
-public:
-    static QString uniqueFilename(const QString &filename);
-
-    static QString completeTransaction(const QList<FileOperation> &renameOperations);
-};
-
-/*
-Input: list of files to copy (ctor).
-Output: list of files to rename in order to complete the transaction (copyFinished signal).
-
-Example (using a single file):
-
-Input source: F:\QUAKE3\baseq3\pak0.pk3
-Input dest: C:\Program Files (x86)\Quake III Arena\baseq3\pak0.pk3
-
-Source is copied to dest, but the destination file is renamed by prepending a random prefix, e.g. 34d8f_pak0.pk3.
-
-Output source: C:\Program Files (x86)\Quake III Arena\baseq3\34d8f_pak0.pk3
-Output dest: C:\Program Files (x86)\Quake III Arena\baseq3\pak0.pk3
-
-The transaction is completed by deleting output dest and renaming output source to output dest.
-
-If the worker is cancelled, all created files are deleted.
-*/
-class FileCopyWorker : public QObject
+class FileExtractWorker : public QObject
 {
     Q_OBJECT
 
 public:
-    FileCopyWorker(const QList<FileOperation> &files);
+    FileExtractWorker(const QString &archiveFilename, const QList<FileOperation> &filesToExtract);
     void cancel();
 
 public slots:
-    void copy();
+    void extract();
 
 signals:
     void fileChanged(const QString &filename);
     void progressChanged(qint64 bytesWritten, qint64 bytesTotal);
     void errorMessage(const QString &message);
-    void copyFinished(QList<FileOperation> renameOperations);
+    void finished(QList<FileOperation> renameOperations);
 
 private:
-    static const int bufferSize = 32 * 1024;
-    const QList<FileOperation> files;
-    char buffer[bufferSize];
+    QString archiveFilename;
+    const QList<FileOperation> filesToExtract;
+    QTemporaryFile tarFile;
     bool isCancelled;
     QMutex cancelMutex;
     QList<FileOperation> renameOperations;
 };
 
-#endif // FILECOPY_H
+#endif // FILEEXTRACT_H

@@ -119,27 +119,12 @@ void InstallWizard_Copy::finishCopy(QList<FileOperation> renameOperations)
     copyThread.wait();
 
     // Complete the transaction.
-    for (int i = 0; i < renameOperations.size(); i++)
+    const QString transactionError = FileUtils::completeTransaction(renameOperations);
+
+    if (!transactionError.isEmpty())
     {
-        const FileOperation &fo = renameOperations.at(i);
-        const QString randomDest = FileUtils::uniqueFilename(fo.dest);
-
-        // Rename dest to random.
-        if (!QFile::rename(fo.dest, randomDest))
-        {
-            ui->lblStatus->setText(QString("Transaction error renaming '%1' to '%2'").arg(fo.dest).arg(randomDest));
-            return;
-        }
-
-        // Rename source to dest.
-        if (!QFile::rename(fo.source, fo.dest))
-        {
-            ui->lblStatus->setText(QString("Transaction error renaming '%1' to '%2'").arg(fo.source).arg(fo.dest));
-            return;
-        }
-
-        // Delete random.
-        QFile::remove(randomDest);
+        ui->lblStatus->setText(transactionError);
+        return;
     }
 
     isCopyFinished = true;
