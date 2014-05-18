@@ -58,8 +58,12 @@ InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
         const QString path(drives.at(i).absoluteFilePath());
         QString text(path);
 
-        // Windows: get the volume name. If it's "Quake3", select this drive.
 #ifdef Q_OS_WIN32
+        // Only add CD/DVD volumes.
+        if (GetDriveType((LPCWSTR)path.utf16()) != DRIVE_CDROM)
+            continue;
+
+        // Get the volume name. If it's "Quake3", select this drive.
         WCHAR volumeNameRaw[128];
 
         if (GetVolumeInformation((LPCWSTR)path.utf16(), volumeNameRaw, sizeof(volumeNameRaw), NULL, NULL, NULL, NULL, 0))
@@ -72,7 +76,7 @@ InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
 
                 if (volumeName == "Quake3")
                 {
-                    selectIndex = i;
+                    selectIndex = ui->cbInstallSource->count();
                 }
             }
         }
