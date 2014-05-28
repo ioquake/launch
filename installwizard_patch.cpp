@@ -35,7 +35,6 @@ InstallWizard_Patch::InstallWizard_Patch(QWidget *parent) :
     isCancelled(false),
     isDownloadFinished(false),
     isPatchInstalled(false),
-    usePatchFileBuffer(true),
     extractWorker(NULL),
     isExtractFinished(false)
 {
@@ -53,14 +52,20 @@ InstallWizard_Patch::~InstallWizard_Patch()
 void InstallWizard_Patch::initializePage()
 {
     isCancelled = isDownloadFinished = isPatchInstalled = isExtractFinished = false;
-    patchFileBuffer.clear();
-    usePatchFileBuffer = true;
     extractWorker = NULL;
 
     patchFile = new QTemporaryFile;
     patchFile->open();
 
-    networkReply = nam.get(QNetworkRequest(QUrl("http://localhost:8080/linuxq3apoint-1.32b-3.x86.run")));
+#ifdef QT_DEBUG
+    QNetworkRequest networkRequest(QUrl("http://localhost:8080/quake3-latest-pk3s.zip"));
+#else
+    QNetworkRequest networkRequest(QUrl("http://ioquake3.org/data/quake3-latest-pk3s.zip"));
+    networkRequest.setRawHeader("Referer", "http://ioquake3.org/extras/patch-data/");
+    //networkRequest.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20100101 Firefox/29.0");
+#endif
+
+    networkReply = nam.get(networkRequest);
     connect(networkReply, &QNetworkReply::readyRead, this, &InstallWizard_Patch::downloadRead);
     connect(networkReply, &QNetworkReply::downloadProgress, this, &InstallWizard_Patch::updateProgress);
     connect(networkReply, &QNetworkReply::finished, this, &InstallWizard_Patch::downloadFinished);
@@ -97,24 +102,7 @@ void InstallWizard_Patch::cancel()
 
 void InstallWizard_Patch::downloadRead()
 {
-    // Skip the first n bytes, giving a valid tar.gz file.
-    if (usePatchFileBuffer)
-    {
-        const qint64 bytesToSkip = 8251;
-
-        patchFileBuffer.append(networkReply->readAll());
-
-        if (patchFileBuffer.length() > bytesToSkip + 1)
-        {
-            patchFile->write(&patchFileBuffer.data()[bytesToSkip], patchFileBuffer.length() - bytesToSkip);
-            usePatchFileBuffer = false;
-            patchFileBuffer.clear();
-        }
-    }
-    else
-    {
-        patchFile->write(networkReply->readAll());
-    }
+    patchFile->write(networkReply->readAll());
 }
 
 void InstallWizard_Patch::downloadFinished()
@@ -135,6 +123,7 @@ void InstallWizard_Patch::downloadFinished()
     if (isCancelled)
         return;
 
+    patchFile->flush();
     isDownloadFinished = true;
 
     // Build a list of pak files to extract.
@@ -143,7 +132,7 @@ void InstallWizard_Patch::downloadFinished()
     for (int i = 1; i <= 8; i++)
     {
         FileOperation fo;
-        fo.source = QString("baseq3/pak%1.pk3").arg(i);
+        fo.source = QString("quake3-latest-pk3s/baseq3/pak%1.pk3").arg(i);
         fo.dest = QString("%1/baseq3/pak%2.pk3").arg(((InstallWizard *)wizard())->getQuakePath()).arg(i);
         filesToExtract.append(fo);
     }

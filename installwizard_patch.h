@@ -66,8 +66,6 @@ private:
     bool isCancelled;
     bool isDownloadFinished;
     bool isPatchInstalled;
-    bool usePatchFileBuffer;
-    QByteArray patchFileBuffer;
 
     QString extractFilename;
     FileExtractWorker *extractWorker;

@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     installwizard_copy.cpp \
     filecopy.cpp \
     quakeutils.cpp \
-    fileextract.cpp
+    fileextract.cpp \
+    minizip/ioapi.c \
+    minizip/unzip.c
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -35,7 +37,9 @@ HEADERS  += mainwindow.h \
     installwizard_copy.h \
     filecopy.h \
     quakeutils.h \
-    fileextract.h
+    fileextract.h \
+    minizip/ioapi.h \
+    minizip/unzip.h
 
 FORMS    += mainwindow.ui \
     installwizard.ui \

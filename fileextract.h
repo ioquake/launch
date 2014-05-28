@@ -49,7 +49,6 @@ signals:
 private:
     QString archiveFilename;
     const QList<FileOperation> filesToExtract;
-    QTemporaryFile tarFile;
     bool isCancelled;
     QMutex cancelMutex;
     QList<FileOperation> renameOperations;

@@ -24,28 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include <QFile>
 #include <QFileInfo>
-#include <QtZlib/zlib.h>
+#include "minizip/unzip.h"
 #include "fileextract.h"
-
-struct TarHeader
-{
-    char name[100];
-    char mode[8];
-    char uid[8];
-    char gid[8];
-    char size[12];
-    char mtime[12];
-    char chksum[8];
-    char typeflag;
-    char linkname[100];
-    char magic[6];
-    char version[2];
-    char uname[32];
-    char gname[32];
-    char devmajor[8];
-    char devminor[8];
-    char prefix[155];
-};
 
 FileExtractWorker::FileExtractWorker(const QString &archiveFilename, const QList<FileOperation> &filesToExtract) : archiveFilename(archiveFilename), filesToExtract(filesToExtract), isCancelled(false)
 {
@@ -55,105 +35,50 @@ void FileExtractWorker::extract()
 {
     qsrand(time(NULL));
 
-    // Extract gzip compressed archive.
-    z_stream zstream;
-    zstream.zalloc = Z_NULL;
-    zstream.zfree = Z_NULL;
-    zstream.opaque = Z_NULL;
-    zstream.avail_in = 0;
-    zstream.next_in = Z_NULL;
+#ifdef Q_OS_WIN32
+    archiveFilename = archiveFilename.replace('/', '\\');
+#endif
 
-    int result = inflateInit2(&zstream, 32 | MAX_WBITS);
+    unzFile zipFile = unzOpen(archiveFilename.toLatin1().constData());
 
-    if (result != Z_OK)
+    if (!zipFile)
     {
-        emit errorMessage("zlib inflateInit2 failed");
+        emit errorMessage(QString("Error opening '%1' for extraction").arg(archiveFilename));
         return;
     }
 
-    QFile archiveFile(archiveFilename);
+    unz_global_info gi;
 
-    if (!archiveFile.open(QIODevice::ReadOnly))
+    if (unzGetGlobalInfo(zipFile, &gi) != UNZ_OK)
     {
-        emit errorMessage(QString("Error opening '%1': '%2'").arg(archiveFile.fileName()).arg(archiveFile.errorString()));
+        unzClose(zipFile);
+        emit errorMessage(QString("Error getting global info from archive '%1'").arg(archiveFilename));
         return;
     }
-
-    tarFile.open();
 
     const int bufferSize = 32 * 1024;
-    static char inputBuffer[bufferSize];
-    static char outputBuffer[bufferSize];
+    char buffer[bufferSize];
 
-    do
+    for (unsigned int i = 0; i < gi.number_entry; i++)
     {
-        qint64 bytesRead = archiveFile.read(inputBuffer, bufferSize);
+        unz_file_info fi;
+        char zipFilename[256];
 
-        if (bytesRead == 0)
-            break;
-
-        zstream.avail_in = bytesRead;
-        zstream.next_in = (z_Bytef *)inputBuffer;
-
-        do
+        if (unzGetCurrentFileInfo(zipFile, &fi, zipFilename, sizeof(zipFilename), NULL, 0, NULL, 0) != UNZ_OK)
         {
-            zstream.avail_out = bufferSize;
-            zstream.next_out = (z_Bytef *)outputBuffer;
-
-            result = inflate(&zstream, Z_NO_FLUSH);
-
-            if (result != Z_OK && result != Z_STREAM_END)
-            {
-                emit errorMessage(QString("zlib error %1").arg(result));
-                inflateEnd(&zstream);
-                return;
-            }
-
-            tarFile.write(outputBuffer, bufferSize - zstream.avail_out);
-        }
-        while (zstream.avail_out == 0);
-    }
-    while (result != Z_STREAM_END);
-
-    archiveFile.close();
-    inflateEnd(&zstream);
-
-    // Extract the files in the TAR file.
-    tarFile.seek(0);
-
-    for (;;)
-    {
-        // Read TAR file header (padded to 512 bytes).
-        TarHeader header;
-
-        if (tarFile.read((char *)&header, sizeof(header)) != sizeof(header))
-            break; // EOF
-
-        tarFile.seek(tarFile.pos() + 512 - sizeof(header));
-
-        // Convert size from octal string.
-        qint64 size = 0;
-        int exponent = 0;
-
-        for (int i = sizeof(header.size) - 1; i >= 0; i--)
-        {
-            int digit = (int)(header.size[i] - '0');
-
-            if (digit < 0 || digit > 7)
-                continue;
-
-            size += qint64(digit * pow(8.0f, exponent));
-            exponent++;
+            unzClose(zipFile);
+            emit errorMessage(QString("Error getting file info from archive '%1'").arg(archiveFilename));
+            return;
         }
 
         // See if this is one of the files to be extracted.
         int extractFileIndex = -1;
 
-        for (int i = 0; i < filesToExtract.size(); i++)
+        for (int j = 0; j < filesToExtract.size(); j++)
         {
-            if (filesToExtract.at(i).source == header.name)
+            if (filesToExtract.at(j).source == zipFilename)
             {
-                extractFileIndex = i;
+                extractFileIndex = j;
                 break;
             }
         }
@@ -161,6 +86,13 @@ void FileExtractWorker::extract()
         // Extract a file.
         if (extractFileIndex != -1)
         {
+            if (unzOpenCurrentFile(zipFile) != UNZ_OK)
+            {
+                unzClose(zipFile);
+                emit errorMessage(QString("'%1': error opening '%2'").arg(archiveFilename).arg(zipFilename));
+                goto cleanup;
+            }
+
             // Write to the destination file if it doesn't exist, otherwise write to a uniquely named file.
             QString filename(filesToExtract.at(extractFileIndex).dest);
             const bool fileExists = QFile::exists(filename);
@@ -174,6 +106,8 @@ void FileExtractWorker::extract()
 
             if (!file.open(QIODevice::WriteOnly))
             {
+                unzCloseCurrentFile(zipFile);
+                unzClose(zipFile);
                 emit errorMessage(QString("'%1': %2").arg(file.fileName()).arg(file.errorString()));
                 goto cleanup;
             }
@@ -192,37 +126,48 @@ void FileExtractWorker::extract()
 
             for (;;)
             {
-                qint64 bytesToRead = bufferSize;
+                const int bytesRead = unzReadCurrentFile(zipFile, buffer, bufferSize);
 
-                if (totalBytesRead + bytesToRead > size)
+                if (bytesRead < 0)
                 {
-                    bytesToRead = size - totalBytesRead;
+                    unzCloseCurrentFile(zipFile);
+                    unzClose(zipFile);
+                    emit errorMessage(QString("'%1': error %2 extracting '%3'").arg(archiveFilename).arg(bytesRead).arg(zipFilename));
+                    goto cleanup;
                 }
-
-                const qint64 bytesRead = tarFile.read(outputBuffer, bytesToRead);
-
-                if (bytesRead == 0)
+                else if (bytesRead == 0)
+                {
                     break;
-
-                file.write(outputBuffer, bytesRead);
-                totalBytesRead += bytesRead;
-                emit progressChanged(totalBytesRead, size);
+                }
+                else
+                {
+                    file.write(buffer, bytesRead);
+                    totalBytesRead += bytesRead;
+                    emit progressChanged(totalBytesRead, fi.uncompressed_size);
+                }
 
                 QMutexLocker locker(&cancelMutex);
 
                 if (isCancelled)
+                {
+                    unzCloseCurrentFile(zipFile);
+                    unzClose(zipFile);
                     goto cleanup;
+                }
             }
-        }
-        else
-        {
-            tarFile.seek(tarFile.pos() + size);
+
+            unzCloseCurrentFile(zipFile);
         }
 
-        // TAR file size is padded to 512 byte blocks.
-        tarFile.seek(tarFile.pos() + ((size % 512) == 0 ? 0 : 512 - (size % 512)));
+        if (i + 1 < gi.number_entry && unzGoToNextFile(zipFile) != UNZ_OK)
+        {
+            emit errorMessage(QString("'%1': error getting next file'").arg(archiveFilename));
+            unzClose(zipFile);
+            goto cleanup;
+        }
     }
 
+    unzClose(zipFile);
     emit finished(renameOperations);
     return;
 
