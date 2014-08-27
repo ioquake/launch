@@ -339,6 +339,19 @@ QTabWidget::tab-bar{
        <string>H</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="btnRunInstallWizard">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>101</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Run Install Wizard</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabRend2">
      <attribute name="title">

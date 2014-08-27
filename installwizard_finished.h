@@ -20,47 +20,25 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef INSTALLWIZARD_FINISHED_H
+#define INSTALLWIZARD_FINISHED_H
 
-#include <QMainWindow>
-#include "settings.h"
+#include <QWizardPage>
 
 namespace Ui {
-class ioLaunch;
+class InstallWizard_Finished;
 }
 
-class ioLaunch : public QMainWindow
+class InstallWizard_Finished : public QWizardPage
 {
     Q_OBJECT
-    
+
 public:
-    explicit ioLaunch(QWidget *parent = 0);
-    ~ioLaunch();
-    
-private slots:
-    void on_btnLaunch_clicked();
-
-    void on_cbResolution_currentIndexChanged(int index);
-
-    void on_rbFull_toggled(bool checked);
-
-    void on_rbWin_toggled(bool checked);
-
-    void on_sbWidth_valueChanged(int arg1);
-
-    void on_sbHeight_valueChanged(int arg1);
-
-    void on_btnRunInstallWizard_clicked();
+    explicit InstallWizard_Finished(QWidget *parent = 0);
+    ~InstallWizard_Finished();
 
 private:
-#ifdef Q_OS_WIN32
-    // Returns false if the settings ioq3 path either doesn't exist or is invalid.
-    bool isQuake3PathValid() const;
-#endif
-
-    Ui::ioLaunch *ui;
-    Settings settings;
+    Ui::InstallWizard_Finished *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // INSTALLWIZARD_FINISHED_H

@@ -20,47 +20,22 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef QUAKEUTILS_H
+#define QUAKEUTILS_H
 
-#include <QMainWindow>
-#include "settings.h"
+class QString;
+class Settings;
 
-namespace Ui {
-class ioLaunch;
-}
-
-class ioLaunch : public QMainWindow
+class QuakeUtils
 {
-    Q_OBJECT
-    
 public:
-    explicit ioLaunch(QWidget *parent = 0);
-    ~ioLaunch();
-    
-private slots:
-    void on_btnLaunch_clicked();
+    // Try to find an existing Q3A installation (not Steam).
+    static QString calculateQuake3Path();
 
-    void on_cbResolution_currentIndexChanged(int index);
+    // Calculate the ioquake3 home path.
+    static QString calculateHomePath();
 
-    void on_rbFull_toggled(bool checked);
-
-    void on_rbWin_toggled(bool checked);
-
-    void on_sbWidth_valueChanged(int arg1);
-
-    void on_sbHeight_valueChanged(int arg1);
-
-    void on_btnRunInstallWizard_clicked();
-
-private:
-#ifdef Q_OS_WIN32
-    // Returns false if the settings ioq3 path either doesn't exist or is invalid.
-    bool isQuake3PathValid() const;
-#endif
-
-    Ui::ioLaunch *ui;
-    Settings settings;
+    static void parseQuake3Config(Settings *settings, const QString &homePath);
 };
 
-#endif // MAINWINDOW_H
+#endif // QUAKEUTILS_H

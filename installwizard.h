@@ -20,47 +20,57 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef INSTALLWIZARD_H
+#define INSTALLWIZARD_H
 
-#include <QMainWindow>
-#include "settings.h"
+#include <QWizard>
+#include "filecopy.h"
 
 namespace Ui {
-class ioLaunch;
+class InstallWizard;
 }
 
-class ioLaunch : public QMainWindow
+class QPushButton;
+class Settings;
+
+class InstallWizard : public QWizard
 {
     Q_OBJECT
-    
+
 public:
-    explicit ioLaunch(QWidget *parent = 0);
-    ~ioLaunch();
-    
+    explicit InstallWizard(QWidget *parent, Settings *settings);
+    ~InstallWizard();
+
+    void clearFileCopyOperations();
+    void addFileCopyOperation(const QString &source, const QString &dest);
+    const QList<FileOperation> &getFileCopyOperations() const;
+
+    bool getIsQuake3PatchRequired() const;
+    void setIsQuake3PatchRequired(bool value);
+
+    QString getQuakePath() const;
+    void setQuakePath(const QString &path);
+
+    enum
+    {
+        Page_Setup,
+        Page_Eula,
+        Page_Copy,
+        Page_Patch,
+        Page_Finished
+    };
+
 private slots:
-    void on_btnLaunch_clicked();
-
-    void on_cbResolution_currentIndexChanged(int index);
-
-    void on_rbFull_toggled(bool checked);
-
-    void on_rbWin_toggled(bool checked);
-
-    void on_sbWidth_valueChanged(int arg1);
-
-    void on_sbHeight_valueChanged(int arg1);
-
-    void on_btnRunInstallWizard_clicked();
+    void cancel();
+    void on_InstallWizard_finished(int result);
 
 private:
-#ifdef Q_OS_WIN32
-    // Returns false if the settings ioq3 path either doesn't exist or is invalid.
-    bool isQuake3PathValid() const;
-#endif
-
-    Ui::ioLaunch *ui;
-    Settings settings;
+    Ui::InstallWizard *ui;
+    QPushButton *cancelButton;
+    Settings *settings;
+    QList<FileOperation> fileCopyOperations;
+    bool isQuake3PatchRequired;
+    QString quakePath;
 };
 
-#endif // MAINWINDOW_H
+#endif // INSTALLWIZARD_H

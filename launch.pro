@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,12 +14,40 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    settings.cpp
+    settings.cpp \
+    installwizard.cpp \
+    installwizard_setup.cpp \
+    installwizard_finished.cpp \
+    installwizard_patch.cpp \
+    installwizard_eula.cpp \
+    installwizard_copy.cpp \
+    filecopy.cpp \
+    quakeutils.cpp \
+    fileextract.cpp \
+    minizip/ioapi.c \
+    minizip/unzip.c
 
 HEADERS  += mainwindow.h \
-    settings.h
+    settings.h \
+    installwizard.h \
+    installwizard_setup.h \
+    installwizard_finished.h \
+    installwizard_patch.h \
+    installwizard_eula.h \
+    installwizard_copy.h \
+    filecopy.h \
+    quakeutils.h \
+    fileextract.h \
+    minizip/ioapi.h \
+    minizip/unzip.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    installwizard.ui \
+    installwizard_setup.ui \
+    installwizard_finished.ui \
+    installwizard_patch.ui \
+    installwizard_eula.ui \
+    installwizard_copy.ui
 
 OTHER_FILES += \
     README.md \
