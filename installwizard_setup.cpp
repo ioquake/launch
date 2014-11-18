@@ -122,7 +122,7 @@ bool InstallWizard_Setup::validatePage()
 
     if (ui->stackPages->currentIndex() == Page_Install)
     {
-        QDir dir(ui->cbInstallSource->currentData().toString());
+        QDir dir(ui->cbInstallSource->currentText());
 
         if (!dir.exists())
         {
@@ -135,7 +135,7 @@ bool InstallWizard_Setup::validatePage()
 
         // Copy page will copy baseq3/pak0.pk3.
         iw->clearFileCopyOperations();
-        iw->addFileCopyOperation(ui->cbInstallSource->currentData().toString() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
+        iw->addFileCopyOperation(ui->cbInstallSource->currentText() + QString("/QUAKE3/baseq3/pak0.pk3"), ui->txtInstallDest->text() + QString("/baseq3/pak0.pk3"));
         iw->setQuakePath(ui->txtInstallDest->text());
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
@@ -214,7 +214,7 @@ bool InstallWizard_Setup::isComplete() const
 {
     if (ui->stackPages->currentIndex() == Page_Install)
     {
-        return !ui->cbInstallSource->currentData().toString().isEmpty() && !ui->txtInstallDest->text().isEmpty();
+        return !ui->cbInstallSource->currentText().isEmpty() && !ui->txtInstallDest->text().isEmpty();
     }
     else if (ui->stackPages->currentIndex() == Page_InstallSteam)
     {
@@ -288,7 +288,7 @@ void InstallWizard_Setup::on_txtLocatePath_textChanged(const QString & /*arg1*/)
 
 void InstallWizard_Setup::on_btnInstallBrowseSource_clicked()
 {
-    const QString location = QFileDialog::getExistingDirectory(wizard(), "Select Quake III Arena CD-ROM directory", ui->cbInstallSource->currentData().toString());
+    const QString location = QFileDialog::getExistingDirectory(wizard(), "Select Quake III Arena CD-ROM directory", ui->cbInstallSource->currentText());
 
     if (!location.isEmpty())
     {
