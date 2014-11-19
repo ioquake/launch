@@ -62,12 +62,12 @@ void InstallWizard_Copy::initializePage()
     qRegisterMetaType<QList<FileOperation> >("QList<FileOperation>");
     copyWorker = new FileCopyWorker(((InstallWizard *)wizard())->getFileCopyOperations());
     copyWorker->moveToThread(&copyThread);
-    connect(&copyThread, &QThread::finished, copyWorker, &QObject::deleteLater);
-    connect(this, &InstallWizard_Copy::copy, copyWorker, &FileCopyWorker::copy);
-    connect(copyWorker, &FileCopyWorker::fileChanged, this, &InstallWizard_Copy::setCopyFilename);
-    connect(copyWorker, &FileCopyWorker::progressChanged, this, &InstallWizard_Copy::setCopyProgress);
-    connect(copyWorker, &FileCopyWorker::errorMessage, this, &InstallWizard_Copy::setCopyErrorMessage);
-    connect(copyWorker, &FileCopyWorker::copyFinished, this, &InstallWizard_Copy::finishCopy);
+    connect(&copyThread, SIGNAL(finished()), copyWorker, SLOT(deleteLater()));
+    connect(this, SIGNAL(copy()), copyWorker, SLOT(copy()));
+    connect(copyWorker, SIGNAL(fileChanged(const QString)), this, SLOT(setCopyFilename(const QString)));
+    connect(copyWorker, SIGNAL(progressChanged(qint64,qint64)), this, SLOT(setCopyProgress(qint64,qint64)));
+    connect(copyWorker, SIGNAL(errorMessage(const QString)), this, SLOT(setCopyErrorMessage(const QString)));
+    connect(copyWorker, SIGNAL(copyFinished(QList<FileOperation>)), this, SLOT(finishCopy(QList<FileOperation>)));
     copyThread.start();
 
     emit copy();

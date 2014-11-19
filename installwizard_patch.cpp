@@ -66,9 +66,9 @@ void InstallWizard_Patch::initializePage()
 #endif
 
     networkReply = nam.get(networkRequest);
-    connect(networkReply, &QNetworkReply::readyRead, this, &InstallWizard_Patch::downloadRead);
-    connect(networkReply, &QNetworkReply::downloadProgress, this, &InstallWizard_Patch::updateProgress);
-    connect(networkReply, &QNetworkReply::finished, this, &InstallWizard_Patch::downloadFinished);
+    connect(networkReply, SIGNAL(readyRead()), this, SLOT(downloadRead()));
+    connect(networkReply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateProgress(qint64,qint64)));
+    connect(networkReply, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 
 void InstallWizard_Patch::cleanupPage()
@@ -141,12 +141,12 @@ void InstallWizard_Patch::downloadFinished()
     qRegisterMetaType<QList<FileOperation> >("QList<FileOperation>");
     extractWorker = new FileExtractWorker(patchFile->fileName(), filesToExtract);
     extractWorker->moveToThread(&extractThread);
-    connect(&extractThread, &QThread::finished, extractWorker, &QObject::deleteLater);
-    connect(this, &InstallWizard_Patch::extract, extractWorker, &FileExtractWorker::extract);
-    connect(extractWorker, &FileExtractWorker::fileChanged, this, &InstallWizard_Patch::setExtractFilename);
-    connect(extractWorker, &FileExtractWorker::progressChanged, this, &InstallWizard_Patch::updateProgress);
-    connect(extractWorker, &FileExtractWorker::errorMessage, this, &InstallWizard_Patch::setErrorMessage);
-    connect(extractWorker, &FileExtractWorker::finished, this, &InstallWizard_Patch::finishExtract);
+    connect(&extractThread, SIGNAL(finished()), extractWorker, SLOT(deleteLater()));
+    connect(this, SIGNAL(extract()), extractWorker, SLOT(extract()));
+    connect(extractWorker, SIGNAL(fileChanged(const QString)), this, SLOT(setExtractFilename(const QString)));
+    connect(extractWorker, SIGNAL(progressChanged(qint64,qint64)), this, SLOT(updateProgress(qint64,qint64)));
+    connect(extractWorker, SIGNAL(errorMessage(const QString)), this, SLOT(setErrorMessage(const QString)));
+    connect(extractWorker, SIGNAL(finished(QList<FileOperation>)), this, SLOT(finishExtract(QList<FileOperation>)));
     extractThread.start();
     emit extract();
 }
