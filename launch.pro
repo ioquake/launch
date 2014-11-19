@@ -58,3 +58,8 @@ RESOURCES += \
     imgs.qrc
 
 RC_FILE = launch.rc
+
+# mac os x doesn't have fopen64 for minizip
+# mac os x (qt5 at least), needs explicit zlib linking
+macx:DEFINES += USE_FILE32API
+macx:LIBS += -lz
