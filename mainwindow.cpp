@@ -102,12 +102,21 @@ void ioLaunch::on_btnLaunch_clicked()
     }
 
     ioq3 = QString("\"") + settings.getQuakePath() + "/ioquake3.x86.exe\"";
-#elif defined Q_OS_MAC
+#else
+
+#if defined Q_OS_MAC
     ioq3 = "open -a ioquake3 --args";
 #elif defined Q_OS_UNIX
     ioq3 = "ioquake3";
 #else
     #error "Unsupported platform"
+#endif
+
+    QString quakePath = settings.getQuakePath();
+    if ( !quakePath.isEmpty() )
+    {
+        ioq3 += QString(" +set fs_basepath \"%1\"").arg(quakePath);
+    }
 #endif
 
     int r_mode = settings.getResolutionMode();

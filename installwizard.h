@@ -62,7 +62,7 @@ public:
 
 private slots:
     void cancel();
-    void on_InstallWizard_finished(int result);
+    void finished(int result);
 
 private:
     Ui::InstallWizard *ui;
