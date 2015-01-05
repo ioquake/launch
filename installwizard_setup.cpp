@@ -43,12 +43,6 @@ InstallWizard_Setup::InstallWizard_Setup(QWidget *parent, Settings *settings) :
 {
     ui->setupUi(this);
 
-#ifndef Q_OS_WIN32
-    ui->rbLocate->setEnabled(false);
-    ui->rbInstall->setChecked(true);
-    ui->stackPages->setCurrentIndex(Page_Install);
-#endif
-
     // Populate drives list.
     QFileInfoList drives = QDir::drives();
     int selectIndex = -1;
@@ -169,7 +163,6 @@ bool InstallWizard_Setup::validatePage()
 
         iw->setQuakePath(ui->txtInstallSteamDest->text());
     }
-#ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
     {
         if (ui->txtLocatePath->text().isEmpty())
@@ -205,7 +198,6 @@ bool InstallWizard_Setup::validatePage()
         iw->setIsQuake3PatchRequired(hash != "48911719d91be25adb957f2d325db4a0");
         iw->setQuakePath(ui->txtLocatePath->text());
     }
-#endif
 
     return true;
 }
@@ -220,12 +212,10 @@ bool InstallWizard_Setup::isComplete() const
     {
         return !ui->txtInstallSteamSource->text().isEmpty() && !ui->txtInstallSteamDest->text().isEmpty();
     }
-#ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
     {
         return !ui->txtLocatePath->text().isEmpty();
     }
-#endif
 
     return true;
 }
@@ -236,7 +226,6 @@ int InstallWizard_Setup::nextId() const
     {
         return InstallWizard::Page_Eula;
     }
-#ifdef Q_OS_WIN32
     else if (ui->stackPages->currentIndex() == Page_Locate)
     {
         if (((InstallWizard *)wizard())->getIsQuake3PatchRequired())
@@ -248,7 +237,6 @@ int InstallWizard_Setup::nextId() const
             return InstallWizard::Page_Finished;
         }
     }
-#endif
 
     // Shouldn't happen.
     Q_ASSERT(false);

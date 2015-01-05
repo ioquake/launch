@@ -46,6 +46,7 @@ InstallWizard::InstallWizard(QWidget *parent, Settings *settings) :
 
     ui->setupUi(this);
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(this, SIGNAL(finished(int)), this, SLOT(finished(int)));
 
     setPage(Page_Setup, new InstallWizard_Setup(this, settings));
     setPage(Page_Eula, new InstallWizard_Eula(this));
@@ -111,14 +112,10 @@ void InstallWizard::cancel()
     reject();
 }
 
-void InstallWizard::on_InstallWizard_finished(int result)
+void InstallWizard::finished(int result)
 {
-#ifdef Q_OS_WIN32
     if (result == QDialog::Accepted)
     {
         settings->setQuakePath(quakePath);
     }
-#else
-    result = result; // Silence warning.
-#endif
 }
