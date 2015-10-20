@@ -9,7 +9,7 @@ ROADMAP
 Required features to reach:
 ---------------------------
 
-Version 1.0(alpha)
+Version 0.1 (alpha)
 
   * launch the ioquake3 program - DONE
   * launch quake3 at different resolutions - DONE
@@ -17,7 +17,7 @@ Version 1.0(alpha)
   * display EULA before downloading q3 patches - not yet implemented
 
 
-2.0(beta)
+0.5 (beta)
 
   * be able to download/install ioquake3
   * be able to copy quake3 data from retail CD
@@ -25,16 +25,16 @@ Version 1.0(alpha)
   * be able to update self
   * initial support for other operating systems - STARTED(Linux)
 
-3.0(Gold)
+1.0
 
   * config launch options
   * config player options
   * WYSIWYG name config
-  * work with steam installation of quake3
+  * work with steam/gog installation of quake3
   * backup/save/swap configs
-  * support for Linux, Windows, and OSX
+  * support for Linux, Windows, and OS X
 
-4.0(PLATINUM)
+2.0
 
   * support for other games (Tremulous/SmokinGuns/TurtleArena/etc.)
   * automated mod switcher
