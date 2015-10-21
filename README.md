@@ -1,7 +1,13 @@
 THE AS OF YET NOT OFFICIALLY NAMED LAUNCHER FOR IOQ3
 ====================================================
 
-The launcher for ioquake3. Built with QT, written in C++
+The launcher for ioquake3. Built with QT, written in C++. 
+
+This project's goal as an updater is to get everyone on Windows, OS X, and Linux onto modern versions of ioquake3, and keep them up-to-date in a style similar to other stand-alone launcher/updater systems for games that aren't on major digital-distribution platforms.
+
+As a launcher this project should enable easy access to ioquake3 features that are otherwise buried in wikis, forums, and README files.
+
+Future goals could include the ability to launch an encapsulated mod for quake 3 or standalone games and keep them updated and on the latest versions of ioquake3 as well.
 
 ROADMAP
 =======
@@ -43,3 +49,4 @@ Version 0.1 (alpha)
   * LAN support
   * preload mods/maps/content via internet protocols
   * uri integration (q3://, trem://, ioq3://, etc.)
+  * rcon interface for remote servers
