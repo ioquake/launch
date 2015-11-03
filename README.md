@@ -9,6 +9,11 @@ As a launcher this project should enable easy access to ioquake3 features that a
 
 Future goals could include the ability to launch an encapsulated mod for quake 3 or standalone games and keep them updated and on the latest versions of ioquake3 as well.
 
+Building on Windows
+=====
+Instructions are available for compiling launch here:
+http://wiki.ioquake3.org/Building_launch
+
 ROADMAP
 =======
 
