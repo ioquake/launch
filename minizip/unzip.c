@@ -72,7 +72,12 @@
         #define NOUNCRYPT
 #endif
 
+#ifdef WIN32
+#include <QtZlib/zlib.h>
+#else
 #include <zlib.h>
+#endif
+
 #include "unzip.h"
 
 #ifdef STDC

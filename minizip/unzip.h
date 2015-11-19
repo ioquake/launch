@@ -48,7 +48,11 @@ extern "C" {
 #endif
 
 #ifndef _ZLIB_H
+#ifdef WIN32
+#include <QtZlib/zlib.h>
+#else
 #include <zlib.h>
+#endif
 #endif
 
 #ifndef  _ZLIBIOAPI_H
